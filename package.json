@@ -1,6 +1,7 @@
 {
   "name": "jobs-server",
   "version": "1.0.0",
+  "type": "module",
   "main": "server.js",
   "comment-scripts": "En DEV se usa nodemon para que autorefresque los cambios sin tener que parar/arrancar",
   "scripts": {
