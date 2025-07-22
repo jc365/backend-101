@@ -1,4 +1,4 @@
-import { load } from 'cheerio';
+import { load as cheerioLoad} from 'cheerio';
 
 /**
  * Recopila los tags configurados mediante cheerio
@@ -6,12 +6,12 @@ import { load } from 'cheerio';
  * @returns {{ data: array de datos recogidos de la pagina }}
  */
 export function collectTags(html) {
-  const $ = load(html);
+  const $ = cheerioLoad(html);
 
   const data = [];
   $("a").each((index, element) => {
     data.push({
-      text: $(element).text(),
+      text: index + ' - ' + $(element).text() ,
       href: $(element).attr("href"),
     });
   });

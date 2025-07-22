@@ -1,5 +1,6 @@
 import puppeteer from 'puppeteer';
 import { analyzeTags } from '../../utils/tagAnalyzer.js'
+import { collectTags } from '../../utils/tagCollect.js'
 
 export async function dynamicScraper(url) {
   try {
@@ -15,7 +16,8 @@ export async function dynamicScraper(url) {
     const html = await page.content();
     await browser.close();
 
-    return analyzeTags(html);
+    // return analyzeTags(html);
+    return collectTags(html);
   } catch (err) {
     throw new Error("Dynamic scraper failed: " + err.message);
   }
