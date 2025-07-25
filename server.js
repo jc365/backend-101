@@ -1,25 +1,40 @@
 import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
 import cors from "cors";
 import puppe from "./routes/puppe.js";
 import scrape from "./routes/scrape.js";
-import process from "./routes/process.js";
+import xprocess from "./routes/process.js"; //- cambiado el nombre por entrar en conflicto con dotenv
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
-const PORT = 5050;
+dotenv.config();
+//-- muy curioso todo lo que suelta --
+// console.log(process);
+// console.log(process.env);
+const PORT = process.env.PORT || 5050;
+const mongoUri = process.env.MONGODB_URI;
 
 app.use(cors());
 app.use(express.json());
 
-app.listen(PORT, () => {
-  console.log(`[SERVER] Listening at http://localhost:${PORT}`);
-});
+// Conection with MongoDB-Atlas
+mongoose
+  .connect(mongoUri)
+  .then(() => console.log("Succesfully conect to MongoDB Atlas"))
+  .catch((error) => console.error("Error conecting to MongoDB:", error));
 
 app.get("/", (req, res) => {
-  res.send("Express server ready (id:ssndhi83434jckldfkdfjl)");
+  res.send("Server ready (id:sntmr101chrzdhi83xyk4u3se4jckldfjl)");
 });
-// Work's routes imported
-app.use(scrape, puppe, process);
 
+// Work's routes imported
+app.use("/scrap", scrape, puppe, xprocess);
+app.use("/users", userRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server listening at http://localhost:${PORT}`);
+});
 
 //----- Ejemplos de funciones para la extraccion de las partes de una URL ------------
 // const urlString = "https://www.example.com:8080/path/page.html?search=js&lang=en#section1";
