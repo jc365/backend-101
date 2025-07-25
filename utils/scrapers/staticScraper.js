@@ -3,6 +3,7 @@ import { analyzeTags } from "../tagAnalyzer.js";
 import { collectTags } from "../tagCollect.js";
 
 export async function staticScraper(url) {
+  console.log('ejecutando staticScraper', url);
   try {
     const response = await axios.get(url, {
       headers: {
