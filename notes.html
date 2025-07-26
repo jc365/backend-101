@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Repositorio Notas Markdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mark.js/dist/mark.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 20px;
+        background: #f7f7fa;
+      }
+      h1 {
+        font-weight: 400;
+      }
+      #searchBar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      #searchInput {
+        flex: 1 0 200px;
+        padding: 7px 12px;
+        border: 1px solid #bfc6d1;
+        border-radius: 6px;
+        font-size: 1em;
+      }
+      #btnSearch {
+        padding: 7px 16px;
+        border: none;
+        background: #3250dd;
+        color: #fff;
+        font-size: 1em;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btnSearch:active {
+        background: #263d9a;
+      }
+
+      #results {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        list-style: none;
+        padding: 0;
+        min-height: 42px;
+      }
+      .result-card {
+        background: #f0f4ff;
+        border-radius: 8px;
+        min-width: 210px;
+        max-width: 320px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        cursor: pointer;
+        transition: box-shadow 0.15s;
+        border: 1px solid #e2e8f0;
+        font-size: 1.07em;
+      }
+      .result-card:hover {
+        box-shadow: 0 4px 16px rgba(32, 64, 220, 0.15);
+        border-color: #b0c4f7;
+        background: #eaf0ff;
+      }
+      .result-card mark {
+        background: #ffe570;
+        padding: 1px 2px;
+        border-radius: 3px;
+      }
+      #pagination {
+        margin-top: 18px;
+        font-size: 1.15em;
+        user-select: none;
+      }
+      #pagination a,
+      #pagination span {
+        margin: 0 4px;
+        text-decoration: none;
+        color: #1a267a;
+        cursor: pointer;
+      }
+      #pagination span.current {
+        font-weight: bold;
+        background: #eaf0ff;
+        padding: 0 7px;
+        border-radius: 4px;
+      }
+      #viewer {
+        margin-top: 38px;
+        padding: 18px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        min-height: 170px;
+        background: #fff;
+        box-shadow: 0 4px 12px #eee;
+        max-width: 900px;
+        font-size: 1.07em;
+        word-break: break-word;
+        overflow-x: auto;
+      }
+      @media (max-width: 650px) {
+        #viewer,
+        #results {
+          max-width: 99vw;
+        }
+        .result-card {
+          min-width: 95vw;
+          max-width: 99vw;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Repositorio de Notas Markdown 📓</h1>
+    <div id="searchBar">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Buscar en notas…"
+        autocomplete="off"
+      />
+      <button id="btnSearch">Buscar</button>
+    </div>
+    <ul id="results"></ul>
+    <div id="pagination" style="margin-top: 16px; font-size: 1.2em"></div>
+    <div id="viewer"><em>Selecciona una nota para verla aquí…</em></div>
+
+    <script>
+      const BACKEND = "http://localhost:5050"; 
+      const PAGE_SIZE = 10;
+      let currentPage = 1;
+      let lastQuery = "";
+      const searchInput = document.getElementById("searchInput");
+      const btnSearch = document.getElementById("btnSearch");
+      const resultsUl = document.getElementById("results");
+      const viewer = document.getElementById("viewer");
+      const pagination = document.getElementById("pagination");
+
+      // Mejor respuesta a Enter, y clic
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") searchNotes();
+      });
+      btnSearch.addEventListener("click", searchNotes);
+
+      function highlight(text, query) {
+        if (!query) return text;
+        let terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+        let re = new RegExp(
+          "(" +
+            terms
+              .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+              .join("|") +
+            ")",
+          "gi"
+        );
+        return text.replace(re, "<mark>$1</mark>");
+      }
+
+      function searchNotes(page = 1) {
+        const query = searchInput.value.trim();
+        resultsUl.innerHTML = "<li><em>Cargando…</em></li>";
+        pagination.innerHTML = "";
+        viewer.innerHTML = "<em>Selecciona una nota para verla aquí…</em>";
+        lastQuery = query;
+        currentPage = page;
+
+        fetch(
+          `${BACKEND}/api/notes/search?q=${encodeURIComponent(
+            query
+          )}&page=${page}&pageSize=${PAGE_SIZE}`
+        )
+          .then((r) => r.json())
+          .then((data) => {
+            console.log("Datos de busqueda:", data);
+            resultsUl.innerHTML = "";
+            if (!data.items || data.items.length === 0) {
+              resultsUl.innerHTML = "<li><em>No hay resultados.</em></li>";
+              return;
+            }
+            data.items.forEach((note) => {
+              const li = document.createElement("li");
+              li.className = "result-card";
+              li.innerHTML = highlight(note.title, query);
+              li.dataset.id = note._id;
+              li.onclick = () => loadNote(note._id);
+              resultsUl.appendChild(li);
+            });
+            renderPagination(data.total, page, data.pageSize, query);
+          })
+          .catch((err) => {
+            resultsUl.innerHTML = "<li><em>Error buscando notas…</em></li>";
+            console.error(err);
+          });
+      }
+
+      function renderPagination(total, page, pageSize, query) {
+        pagination.innerHTML = "";
+        const lastPage = Math.ceil(total / pageSize);
+        if (lastPage <= 1) return;
+        for (let i = 1; i <= lastPage; i++) {
+          if (i === page) {
+            const span = document.createElement("span");
+            span.className = "current";
+            span.textContent = i;
+            pagination.appendChild(span);
+          } else {
+            const a = document.createElement("a");
+            a.textContent = i;
+            a.href = "#";
+            a.onclick = (e) => {
+              e.preventDefault();
+              searchNotes(i);
+            };
+            pagination.appendChild(a);
+          }
+        }
+      }
+
+      function loadNote(id) {
+        viewer.innerHTML = "<em>Cargando nota…</em>";
+
+        fetch(`${BACKEND}/api/notes/${id}`)
+          .then((res) => res.json())
+          .then((note) => {
+            const html = marked.parse(note.content);
+            viewer.innerHTML = `<h2>${note.title}</h2>` + html;
+            var instance = new Mark(viewer);
+            instance.mark(searchInput.value);
+          })
+          .catch((err) => {
+            viewer.innerHTML = "<em>Error cargando nota.</em>";
+            console.error(err);
+          });
+      }
+
+      // Carga inicial, primer render, "vacía" o con query si lo deseas
+      // searchNotes();
+    </script>
+  </body>
+</html>
