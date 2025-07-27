@@ -29,7 +29,7 @@ app.get("/", (req, res) => {
 
 // Work's routes imported
 app.use("/scrap", scrapRoutes);
-app.use("/users", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/notes", noteRoutes);
 
 app.listen(PORT, () => {
