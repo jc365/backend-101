@@ -2,11 +2,9 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import puppe from "./routes/puppe.js";
-import scrape from "./routes/scrape.js";
-import xprocess from "./routes/process.js"; //- cambiado el nombre por entrar en conflicto con dotenv
 import userRoutes from "./routes/userRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
+import scrapRoutes from "./routes/scrapRoutes.js";
 
 const app = express();
 dotenv.config();
@@ -30,7 +28,7 @@ app.get("/", (req, res) => {
 });
 
 // Work's routes imported
-app.use("/scrap", scrape, puppe, xprocess);
+app.use("/scrap", scrapRoutes);
 app.use("/users", userRoutes);
 app.use("/api/notes", noteRoutes);
 
