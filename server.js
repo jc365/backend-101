@@ -5,10 +5,12 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import scrapRoutes from "./routes/scrapRoutes.js";
+import reboundRoutes from "./routes/reboundRoutes.js";
+import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
 const app = express();
 dotenv.config();
-//-- muy curioso todo lo que suelta --
+//-- muy curioso todo lo que suelta (el segundo esta incluido en el maremagnum del primero) --
 // console.log(process);
 // console.log(process.env);
 const PORT = process.env.PORT || 5050;
@@ -29,8 +31,15 @@ app.get("/", (req, res) => {
 
 // Work's routes imported
 app.use("/scrap", scrapRoutes);
+app.use("/rebound", reboundRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/static", staticPagesRoutes);
+
+// Middleware for routes not found
+app.use((req, res) => {
+  res.status(404).send(`Cannot GET ${req.originalUrl}`);
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening at http://localhost:${PORT}`);
