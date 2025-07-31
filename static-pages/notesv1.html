@@ -90,11 +90,9 @@
         padding: 0 7px;
         border-radius: 4px;
       }
-
-      /* VISOR */
       #viewer {
         margin-top: 38px;
-        padding: 25px 18px;
+        padding: 18px;
         border: 1px solid #eee;
         border-radius: 10px;
         min-height: 170px;
@@ -104,34 +102,6 @@
         font-size: 1.07em;
         word-break: break-word;
         overflow-x: auto;
-        position: relative; /* Para posicionar botones */
-      }
-
-      /* Botonera posición esquina superior derecha */
-      .botonera {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        margin: 6px,
-        display: flex;
-        gap: 10px;
-        z-index: 1000;
-      }
-
-      .botonera button {
-        background-color: #3250dd;
-        border: none;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.9em;
-        transition: background-color 0.3s ease;
-      }
-
-      .botonera button:hover {
-        background-color: #263d9a;
       }
 
       /* Estilo para tags */
@@ -170,18 +140,6 @@
         font-family: monospace;
       }
 
-      /* Mensajes de estado */
-      #mensaje {
-        margin-bottom: 12px;
-        font-weight: bold;
-      }
-      #mensaje.success {
-        color: green;
-      }
-      #mensaje.error {
-        color: red;
-      }
-
       @media (max-width: 650px) {
         #viewer,
         #results {
@@ -195,7 +153,7 @@
     </style>
   </head>
   <body>
-    <h1>Repositorio de Notas Markdown 📓 (v1.2)</h1>
+    <h1>Repositorio de Notas Markdown 📓 (v1.0)</h1>
 
     <div id="searchBar">
       <input
@@ -209,8 +167,10 @@
 
     <div id="pagination" style="margin-top: 16px; font-size: 1.2em"></div>
 
-    <!-- Zona Upload -->
-    <label for="upFiles" style="margin-right: 8px">Upload al Repositorio ...</label>
+    <!-- INI/ Zona Upload -->
+    <label for="upFiles" style="margin-right: 8px">
+      Upload al Repositorio ...
+    </label>
     <input
       id="upFiles"
       type="file"
@@ -222,18 +182,13 @@
       <button id="uploadBtn" onclick="startUpload()">Subir ficheros</button>
     </div>
     <div id="status"></div>
-
-    <!-- Contenedor para mensajes de respuesta -->
-    <div id="mensaje"></div>
+    <!-- FIN/ Zona Upload -->
 
     <ul id="results"></ul>
 
-    <div id="viewer">
-      <em>Visor: Selecciona una nota para verla aquí…</em>
-    </div>
+    <div id="viewer"><em>Visor: Selecciona una nota para verla aquí…</em></div>
 
     <script>
-      // const BACKEND = "http://localhost:5050"; //--render online
       const BACKEND = "https://backend-101-hu0a.onrender.com"; //--render online
       const PAGE_SIZE = 10;
       let currentPage = 1;
@@ -267,20 +222,6 @@
         status.innerHTML = "";
       }
 
-      // Función para mostrar mensajes
-      function mostrarMensaje(texto, tipo = "success") {
-        const mensajeElem = document.getElementById("mensaje");
-        if (!mensajeElem) return;
-        mensajeElem.textContent = texto;
-        mensajeElem.className = tipo; // "success" o "error"
-
-        // Ocultar mensaje luego de 5 segundos
-        setTimeout(() => {
-          mensajeElem.textContent = "";
-          mensajeElem.className = "";
-        }, 5000);
-      }
-
       // Subir ficheros seleccionados
       async function startUpload() {
         const status = document.getElementById("status");
@@ -289,10 +230,36 @@
         for (const file of selectedFiles) {
           try {
             const content = await file.text();
+            const lines = content.split(/\r?\n/);
+
+            // Extraer título
+            let title = "";
+            for (const line of lines) {
+              const match = line.match(/^# (.+)$/);
+              if (match) {
+                title = match[1];
+                break;
+              }
+            }
+
+            // Extraer tags
+            let tags = [];
+            for (const line of lines) {
+              if (/^\s*tags:/i.test(line)) {
+                const tagString = line.split(/tags:/i)[1].trim();
+                if (tagString.length > 0) {
+                  tags = tagString.split(/\s+/).filter(Boolean);
+                }
+                break;
+              }
+            }
 
             const doc = {
               filename: file.name,
+              title: title || file.name,
               content,
+              tags,
+              createdAt: new Date().toISOString(),
             };
 
             const res = await fetch(`${BACKEND}/api/notes/upload`, {
@@ -305,21 +272,8 @@
 
             const data = await res.json();
 
-            if (data.status === "success") {
-              const operacion = data.operacion;
-              if (operacion === "insert") {
-                mostrarMensaje(`Nota "${doc.filename}" creada correctamente.`, "success");
-              } else if (operacion === "update") {
-                mostrarMensaje(`Nota "${doc.filename}" actualizada correctamente.`, "success");
-              }
-
-              status.innerHTML += `<div style="color:green;">✔ ${file.name} subido correctamente</div>`;
-            } else {
-              mostrarMensaje(`Error con "${doc.filename}": ${data.message || "Error desconocido"}`, "error");
-              status.innerHTML += `<div style="color:red;">✘ Error con ${file.name}: ${data.message || "Error desconocido"}</div>`;
-            }
+            status.innerHTML += `<div style="color:green;">✔ ${file.name} subido correctamente</div>`;
           } catch (e) {
-            mostrarMensaje(`Error con "${file.name}": ${e.message}`, "error");
             status.innerHTML += `<div style="color:red;">✘ Error con ${file.name}: ${e.message}</div>`;
             console.error(`Error subiendo ${file.name}:`, e);
           }
@@ -337,7 +291,9 @@
         let terms = query.toLowerCase().split(/\s+/).filter(Boolean);
         let re = new RegExp(
           "(" +
-            terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") +
+            terms
+              .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+              .join("|") +
             ")",
           "gi"
         );
@@ -406,7 +362,8 @@
         }
       }
 
-      // Carga nota y la muestra con resaltado en título y contenido
+      // Carga nota y la muestra con resaltado en título (highlight())
+      // y en contenido usando mark.js
       function loadNote(id) {
         viewer.innerHTML = "<em>Cargando nota…</em>";
         fetch(`${BACKEND}/api/notes/${id}`)
@@ -419,78 +376,26 @@
                     .join("")}</div>`
                 : "";
 
-            // Botonera posicionada en la esquina superior derecha
             viewer.innerHTML = `
-              <div class="botonera">
-                <button id="editTitleBtn">Editar título</button>
-                <button id="deleteNoteBtn">Borrar nota</button>
-                <button id="downloadMdBtn">Descargar .md</button>
-              </div>
-              ${tagsHtml}
-              <div id="noteContent">${marked.parse(note.content)}</div>
-            `;
+            <button id="downloadMdBtn" style="margin-bottom:12px;float:right;">Descargar .md</button>
+            ${tagsHtml}
+            <div id="noteContent">${marked.parse(note.content)}</div>
+          `;
 
-            // Descargar .md
+            // Descargar markdown
             document.getElementById("downloadMdBtn").onclick = function () {
               const blob = new Blob([note.content], { type: "text/markdown" });
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = note.filename || note.title.replace(/\s+/g, "_") + ".md";
+              a.download =
+                note.filename || note.title.replace(/\s+/g, "_") + ".md";
               document.body.appendChild(a);
               a.click();
               setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
               }, 100);
-            };
-
-            // EDITAR TÍTULO
-            document.getElementById("editTitleBtn").onclick = () => {
-              const newTitle = prompt("Editar título de la nota:", note.title);
-              if (newTitle && newTitle.trim() !== "" && newTitle !== note.title) {
-                fetch(`${BACKEND}/api/notes/${id}`, {
-                  method: "PATCH",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ title: newTitle.trim() }),
-                })
-                  .then((res) => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                  })
-                  .then((updatedNote) => {
-                    mostrarMensaje("Título actualizado", "success");
-                    loadNote(id); // recarga nota con título editado
-                    searchNotes(currentPage); // refresca la lista para mostrar nuevo título
-                  })
-                  .catch((err) => {
-                    mostrarMensaje("Error actualizando título", "error");
-                    console.error(err);
-                  });
-              }
-            };
-
-            // BORRAR NOTA
-            document.getElementById("deleteNoteBtn").onclick = () => {
-              if (
-                confirm(
-                  "¿Estás seguro de querer borrar esta nota? Esta acción no se puede deshacer."
-                )
-              ) {
-                fetch(`${BACKEND}/api/notes/${id}`, {
-                  method: "DELETE",
-                })
-                  .then((res) => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    mostrarMensaje("Nota borrada correctamente", "success");
-                    viewer.innerHTML = "<em>Selecciona una nota para verla aquí…</em>";
-                    searchNotes(currentPage); // refresca listado
-                  })
-                  .catch((err) => {
-                    mostrarMensaje("Error borrando la nota", "error");
-                    console.error(err);
-                  });
-              }
             };
 
             // Aplicar resaltado con mark.js en contenido
@@ -520,12 +425,11 @@
           })
           .catch((err) => {
             viewer.innerHTML = "<em>Error cargando nota.</em>";
-            mostrarMensaje("Error cargando nota", "error");
             console.error(err);
           });
       }
 
-      // Puedes descomentar para lanzar búsqueda al cargar la página
+      // Puedes descomentar si quieres que lance la búsqueda al cargar la página:
       // searchNotes();
     </script>
   </body>

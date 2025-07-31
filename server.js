@@ -10,9 +10,6 @@ import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
 const app = express();
 dotenv.config();
-//-- muy curioso todo lo que suelta (el segundo esta incluido en el maremagnum del primero) --
-// console.log(process);
-// console.log(process.env);
 const PORT = process.env.PORT || 5050;
 const mongoUri = process.env.MONGODB_URI;
 
