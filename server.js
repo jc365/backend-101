@@ -6,6 +6,7 @@ import userRoutes from "./routes/userRoutes.js";
 import noteRoutes from "./routes/noteRoutes.js";
 import scrapRoutes from "./routes/scrapRoutes.js";
 import reboundRoutes from "./routes/reboundRoutes.js";
+import apiScrapRoutes from "./scrap/Routes.js";
 import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/scrap", scrapRoutes);
 app.use("/rebound", reboundRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/scraps", apiScrapRoutes);
 app.use("/static", staticPagesRoutes);
 
 // Middleware for routes not found
