@@ -11,7 +11,7 @@ const noteSchema = new mongoose.Schema({
   filename: String,
   title: String,
   content: String,
-  createdAt: Date,
+  updated_data: Date,
   tags: { type: [String], default: [] },
 });
 
