@@ -3,10 +3,11 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import userRoutes from "./routes/userRoutes.js";
-import noteRoutes from "./routes/noteRoutes.js";
+// import noteRoutes from "./routes/noteRoutes.js";
 import scrapRoutes from "./routes/scrapRoutes.js";
 import reboundRoutes from "./routes/reboundRoutes.js";
 import apiScrapRoutes from "./APIS/scrap/Routes.js";
+import apiNoteRoutes from "./APIS/note/Routes.js";
 import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
 const app = express();
@@ -31,7 +32,8 @@ app.get("/", (req, res) => {
 app.use("/scrap", scrapRoutes);
 app.use("/rebound", reboundRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/notes", noteRoutes);
+app.use("/api/notes", apiNoteRoutes);
+// app.use("/api/notes", noteRoutes);
 app.use("/api/scraps", apiScrapRoutes);
 app.use("/static", staticPagesRoutes);
 
