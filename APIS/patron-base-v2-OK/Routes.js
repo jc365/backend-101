@@ -26,7 +26,7 @@ const validateObjectId = (req, res, next) => {
 // Primero las rutas con dos parámetros dinámicos y sin MW
 router.get("/:campo/:valor", ItemController.buscarPorCampo);
 
-// Luego las rutas con :id junto con MW para validarlo
+// Luego las rutas con :id junto con MW para validar el formato del ID
 router.get("/:id", validateObjectId, ItemController.obtenerItem);
 router.put("/:id", validateObjectId, ItemController.actualizarItem);
 router.patch("/:id", validateObjectId, ItemController.actualizarParcialItem);

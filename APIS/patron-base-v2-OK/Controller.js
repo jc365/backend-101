@@ -3,23 +3,13 @@
 // Observa que importa el modelo como Item, como objeto abstracto que
 // permite no tener que cambiar nada en las funciones de tratamiento
 // aunque esta especializado para el elemento que persiste.
-import Item from "./Model.js";
-import { paginate } from "../paginate.js";
-
-// AJUSTAR s/caso para limitar la ruta generica buscarPorCampo (solo permite los indicados)
-// AJUSTAR s/caso para limitar la ruta generica buscarPorCampo (solo permite los indicados)
-// AJUSTAR s/caso para limitar la ruta generica buscarPorCampo (solo permite los indicados)
-const camposPermitidosBuscar = ["alias"]; //-- ["name", "categoria", "codigo"];
-
-// const listarItemsOLD = async (req, res) => {
-//   try {
-//     const items = await Item.find();
-//     return sendSuccess(res, items);
-//   } catch (err) {
-//     console.error(err);
-//     return sendError(res, "Error al obtener items");
-//   }
-// };
+import Item, { camposPermitidosBuscar } from "./Model.js";
+import {
+  paginate,
+  sendSuccess,
+  sendError,
+  sanitizeValor,
+} from "../common-utils.js";
 
 const listarItems = async (req, res) => {
   try {
@@ -94,7 +84,7 @@ const borrarItem = async (req, res) => {
     if (!item) {
       return sendError(res, "No se encontró el Item a borrar", null, 404);
     }
-    // According to the purist view of REST, status should be 204 without JSON. 
+    // According to the purist view of REST, status should be 204 without JSON.
     // For ease of processing, we send a 200 with standar JSON.
     return sendSuccess(res, null, "Item borrado correctamente");
   } catch (err) {
@@ -108,7 +98,7 @@ const buscarPorCampo = async (req, res) => {
   if (!camposPermitidosBuscar.includes(campo)) {
     return sendError(
       res,
-      `Búsqueda por campo '${campo}' no permitida`,
+      `Search by field '${campo}' not available`,
       null,
       400
     );
