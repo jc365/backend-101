@@ -1,5 +1,5 @@
 import fs from "fs";
-import { dynamicImport, pathJoin } from "./APIS/_nucleo/toolPaths.mjs";
+import { dynamicImport, pathJoin } from "./toolPaths.mjs";
 
 /**
  * Recorre el 'modulesBasePath' y en cada subdirectorio que encuentra, busca ficheros con el

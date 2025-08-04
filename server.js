@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
-import registerAutomaticRoutes from "./registerAutomaticRoutes.js";
+import registerAutomaticRoutes from "./APIS/_nucleo/registerAutomaticRoutes.js";
 import { ROOT_DIR, pathJoin } from "./APIS/_nucleo/toolPaths.mjs";
 //-- Static routes
 import userRoutes from "./routes/userRoutes.js";
