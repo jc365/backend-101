@@ -3,11 +3,8 @@
 // Observa que importa el modelo como Item, como objeto abstracto que
 // permite no tener que cambiar nada en las funciones de tratamiento
 // aunque esta especializado para el elemento al que da funcionalidad.
-import {
-  sendSuccess,
-  sendError,
-  sanitizeValor,
-} from "./common-utils.js";
+
+import { sendSuccess, sendError, sanitizeValor } from "./common-utils.js";
 import paginate from "./paginate.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
@@ -137,5 +134,4 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
   };
 };
 
-export default crudApiFactory; 
-
+export default crudApiFactory;

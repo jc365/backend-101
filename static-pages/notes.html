@@ -362,7 +362,7 @@
       }
 
       // Función de búsqueda de notas
-      function searchNotes(page = 1) {
+      function searchNotes(page = 1, page_size = 5) {
         const query = searchInput.value.trim();
         document.getElementById("status").innerHTML = "";
         resultsUl.innerHTML = "<li><em>Cargando…</em></li>";
@@ -374,30 +374,33 @@
         fetch(
           `${BACKEND}/api/v1/notes/search?q=${encodeURIComponent(
             query
-          )}&page_size=${PAGE_SIZE}`
+          )}&page=${page}&page_size=${PAGE_SIZE}&mode=page`
         )
           .then((r) => r.json())
-          .then((data) => {
+          .then((result) => {
             resultsUl.innerHTML = "";
-            if (!data.data || data.data.length === 0) {
+            if (!result.data || result.data.length === 0) {
               resultsUl.innerHTML = "<li><em>No hay resultados.</em></li>";
+              renderPagination(0, 1, pageSize, query, {});
               return;
             }
-            data.data.forEach((note) => {
+
+            result.data.forEach((note) => {
               const li = document.createElement("li");
               li.className = "result-card";
-              li.innerHTML = note._id + '- ' + highlight(note.title, query);
+              li.innerHTML = note._id + "- " + highlight(note.title, query);
               li.dataset.id = note._id;
               li.onclick = () => loadNote(note._id);
               resultsUl.appendChild(li);
             });
+
             // renderPagination(data.total, page, data.pageSize, query);
             renderPagination(
-              data.pagination.total,
-              data.pagination.page,
-              data.pagination.page_size,
+              result.pagination.total,
+              result.pagination.page,
+              result.pagination.page_size,
               query,
-              data.links
+              result.links
             );
           })
           .catch((err) => {
@@ -407,27 +410,48 @@
       }
 
       // Paginación
-      function renderPagination(total, page, pageSize, query, links) {
+      function renderPagination(total, currentPage, pageSize, query, links) {
         pagination.innerHTML = "";
-        const lastPage = Math.ceil(total / pageSize);
-        if (lastPage <= 1) return;
-        for (let i = 1; i <= lastPage; i++) {
-          if (i === page) {
-            const span = document.createElement("span");
-            span.className = "current";
-            span.textContent = i;
-            pagination.appendChild(span);
-          } else {
-            const a = document.createElement("a");
-            a.textContent = i;
-            a.href = "#";
-            a.onclick = (e) => {
-              e.preventDefault();
-              searchNotes(i);
-            };
-            pagination.appendChild(a);
-          }
+
+        // Prev button
+        const prevBtn = document.createElement("button");
+        prevBtn.textContent = "Anterior";
+        prevBtn.disabled = !links.prev;
+        if (links.prev) {
+          prevBtn.onclick = () => fetchByUrl(links.prev);
         }
+        pagination.appendChild(prevBtn);
+
+        // Page info
+        const info = document.createElement("span");
+        info.textContent = `Página ${currentPage} de ${Math.ceil(
+          total / pageSize
+        )}`;
+        pagination.appendChild(info);
+
+        // Next button
+        const nextBtn = document.createElement("button");
+        nextBtn.textContent = "Siguiente";
+        nextBtn.disabled = !links.next;
+        if (links.next) {
+          nextBtn.onclick = () => fetchByUrl(links.next);
+        }
+        pagination.appendChild(nextBtn);
+      }
+
+      function fetchByUrl(url) {
+        // Creamos un objeto URL para extraer los params
+        const absolute = url.startsWith("http")
+          ? url
+          : window.location.origin + url;
+        const searchParams = new URL(absolute).searchParams;
+        const page = searchParams.get("page")
+          ? parseInt(searchParams.get("page"), 10)
+          : 1;
+        const page_size = searchParams.get("page_size")
+          ? parseInt(searchParams.get("page_size"), 10)
+          : 5;
+        searchNotes(page, page_size);
       }
 
       // Carga nota y la muestra con resaltado en título y contenido
@@ -436,9 +460,9 @@
         fetch(`${BACKEND}/api/v1/notes/${id}`)
           .then((res) => res.json())
           .then((result) => {
-            console.log('result', result);
+            console.log("result", result);
             const note = result.data;
-            console.log('note', note);
+            console.log("note", note);
             const tagsHtml =
               note.tags && note.tags.length > 0
                 ? `<div class="tags">${note.tags
