@@ -34,7 +34,7 @@ export default async function registerAutomaticRoutes(
       try {
         const { default: router } = await import(routeURL);
         app.use(`${prefix}/${version}/${resource}s`, router);
-        console.log(`✅ Ruta montada: ${prefix}/${version}/${resource}s`);
+        console.log(`✅ Ruta dinamica montada: ${prefix}/${version}/${resource}s`);
       } catch (err) {
         console.error(
           `❌ Error montando ruta ${routeFile} para recurso ${resource}:`,

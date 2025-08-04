@@ -5,6 +5,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import cors from "cors";
 import registerAutomaticRoutes from "./registerAutomaticRoutes.js";
+//-- Static routes
 import userRoutes from "./routes/userRoutes.js";
 // import noteRoutes from "./routes/noteRoutes.js";
 // import scrapRoutes from "./routes/scrapRoutes.js";
@@ -26,7 +27,7 @@ app.use(express.json());
 // Conection with MongoDB-Atlas
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log("Succesfully conect to MongoDB Atlas"))
+  .then(() => console.log("✅✅ Succesfully conect to MongoDB Atlas"))
   .catch((error) => console.error("Error conecting to MongoDB:", error));
 
 app.get("/", (req, res) => {
@@ -50,7 +51,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server listening at http://localhost:${PORT}`);
+  console.log(`✅✅ Server listening at http://localhost:${PORT}`);
 });
 
 export default app;
