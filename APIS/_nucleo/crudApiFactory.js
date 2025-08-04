@@ -4,11 +4,11 @@
 // permite no tener que cambiar nada en las funciones de tratamiento
 // aunque esta especializado para el elemento al que da funcionalidad.
 import {
-  paginate,
   sendSuccess,
   sendError,
   sanitizeValor,
 } from "./common-utils.js";
+import paginate from "./paginate.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
   const listarItems = async (req, res) => {

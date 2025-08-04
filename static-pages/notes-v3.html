@@ -195,7 +195,7 @@
     </style>
   </head>
   <body>
-    <h1>Repositorio de Notas Markdown 📓 (v1.3)</h1>
+    <h1>Repositorio de Notas Markdown 📓 (v1.2)</h1>
 
     <div id="searchBar">
       <input
@@ -210,9 +210,7 @@
     <div id="pagination" style="margin-top: 16px; font-size: 1.2em"></div>
 
     <!-- Zona Upload -->
-    <label for="upFiles" style="margin-right: 8px"
-      >Upload al Repositorio ...</label
-    >
+    <label for="upFiles" style="margin-right: 8px">Upload al Repositorio ...</label>
     <input
       id="upFiles"
       type="file"
@@ -235,9 +233,9 @@
     </div>
 
     <script>
-      const BACKEND = "http://localhost:5050"; //--render online
-      // const BACKEND = "https://backend-101-hu0a.onrender.com"; //--render online
-      const PAGE_SIZE = 3;
+      // const BACKEND = "http://localhost:5050"; //--render online
+      const BACKEND = "https://backend-101-hu0a.onrender.com"; //--render online
+      const PAGE_SIZE = 10;
       let currentPage = 1;
       let lastQuery = "";
 
@@ -297,7 +295,7 @@
               content,
             };
 
-            const res = await fetch(`${BACKEND}/api/v1/notes/upload`, {
+            const res = await fetch(`${BACKEND}/api/notes/upload`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(doc),
@@ -310,28 +308,15 @@
             if (data.status === "success") {
               const operacion = data.operacion;
               if (operacion === "insert") {
-                mostrarMensaje(
-                  `Nota "${doc.filename}" creada correctamente.`,
-                  "success"
-                );
+                mostrarMensaje(`Nota "${doc.filename}" creada correctamente.`, "success");
               } else if (operacion === "update") {
-                mostrarMensaje(
-                  `Nota "${doc.filename}" actualizada correctamente.`,
-                  "success"
-                );
+                mostrarMensaje(`Nota "${doc.filename}" actualizada correctamente.`, "success");
               }
 
               status.innerHTML += `<div style="color:green;">✔ ${file.name} subido correctamente</div>`;
             } else {
-              mostrarMensaje(
-                `Error con "${doc.filename}": ${
-                  data.message || "Error desconocido"
-                }`,
-                "error"
-              );
-              status.innerHTML += `<div style="color:red;">✘ Error con ${
-                file.name
-              }: ${data.message || "Error desconocido"}</div>`;
+              mostrarMensaje(`Error con "${doc.filename}": ${data.message || "Error desconocido"}`, "error");
+              status.innerHTML += `<div style="color:red;">✘ Error con ${file.name}: ${data.message || "Error desconocido"}</div>`;
             }
           } catch (e) {
             mostrarMensaje(`Error con "${file.name}": ${e.message}`, "error");
@@ -352,9 +337,7 @@
         let terms = query.toLowerCase().split(/\s+/).filter(Boolean);
         let re = new RegExp(
           "(" +
-            terms
-              .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
-              .join("|") +
+            terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") +
             ")",
           "gi"
         );
@@ -372,33 +355,26 @@
         currentPage = page;
 
         fetch(
-          `${BACKEND}/api/v1/notes/search?q=${encodeURIComponent(
+          `${BACKEND}/api/notes/search?q=${encodeURIComponent(
             query
-          )}&page_size=${PAGE_SIZE}`
+          )}&page=${page}&pageSize=${PAGE_SIZE}`
         )
           .then((r) => r.json())
           .then((data) => {
             resultsUl.innerHTML = "";
-            if (!data.data || data.data.length === 0) {
+            if (!data.items || data.items.length === 0) {
               resultsUl.innerHTML = "<li><em>No hay resultados.</em></li>";
               return;
             }
-            data.data.forEach((note) => {
+            data.items.forEach((note) => {
               const li = document.createElement("li");
               li.className = "result-card";
-              li.innerHTML = note._id + '- ' + highlight(note.title, query);
+              li.innerHTML = highlight(note.title, query);
               li.dataset.id = note._id;
               li.onclick = () => loadNote(note._id);
               resultsUl.appendChild(li);
             });
-            // renderPagination(data.total, page, data.pageSize, query);
-            renderPagination(
-              data.pagination.total,
-              data.pagination.page,
-              data.pagination.page_size,
-              query,
-              data.links
-            );
+            renderPagination(data.total, page, data.pageSize, query);
           })
           .catch((err) => {
             resultsUl.innerHTML = "<li><em>Error buscando notas…</em></li>";
@@ -407,7 +383,7 @@
       }
 
       // Paginación
-      function renderPagination(total, page, pageSize, query, links) {
+      function renderPagination(total, page, pageSize, query) {
         pagination.innerHTML = "";
         const lastPage = Math.ceil(total / pageSize);
         if (lastPage <= 1) return;
@@ -433,12 +409,9 @@
       // Carga nota y la muestra con resaltado en título y contenido
       function loadNote(id) {
         viewer.innerHTML = "<em>Cargando nota…</em>";
-        fetch(`${BACKEND}/api/v1/notes/${id}`)
+        fetch(`${BACKEND}/api/notes/${id}`)
           .then((res) => res.json())
-          .then((result) => {
-            console.log('result', result);
-            const note = result.data;
-            console.log('note', note);
+          .then((note) => {
             const tagsHtml =
               note.tags && note.tags.length > 0
                 ? `<div class="tags">${note.tags
@@ -463,8 +436,7 @@
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download =
-                note.filename || note.title.replace(/\s+/g, "_") + ".md";
+              a.download = note.filename || note.title.replace(/\s+/g, "_") + ".md";
               document.body.appendChild(a);
               a.click();
               setTimeout(() => {
@@ -476,11 +448,7 @@
             // EDITAR TÍTULO
             document.getElementById("editTitleBtn").onclick = () => {
               const newTitle = prompt("Editar título de la nota:", note.title);
-              if (
-                newTitle &&
-                newTitle.trim() !== "" &&
-                newTitle !== note.title
-              ) {
+              if (newTitle && newTitle.trim() !== "" && newTitle !== note.title) {
                 fetch(`${BACKEND}/api/notes/${id}`, {
                   method: "PATCH",
                   headers: { "Content-Type": "application/json" },
@@ -515,8 +483,7 @@
                   .then((res) => {
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     mostrarMensaje("Nota borrada correctamente", "success");
-                    viewer.innerHTML =
-                      "<em>Selecciona una nota para verla aquí…</em>";
+                    viewer.innerHTML = "<em>Selecciona una nota para verla aquí…</em>";
                     searchNotes(currentPage); // refresca listado
                   })
                   .catch((err) => {

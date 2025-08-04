@@ -16,6 +16,9 @@ const validateObjectId = (req, res, next) => {
   next();
 };
 
+router.get("/search", ItemController.searchItem);
+router.post("/upload", ItemController.uploadItem);
+
 //====================== R U T A S - B A S E ==================================
 // Primero las rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);
