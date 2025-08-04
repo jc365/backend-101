@@ -1,9 +1,13 @@
+/**
+ * Este fichero ......
+ * Se ejecuta con <node create-api.mjs --name ManOLO  --versions v1,v2>
+ */
 import fs from "fs";
 import path from "path";
 import minimist from "minimist";
 import { fileURLToPath } from "url";
 
-const DIR_FATHER_RESOURCES = "midir";
+const DIR_FATHER_RESOURCES = "APIS";
 const DIR_TEMPLATE = "_template-v1";
 
 // Función para normalizar nombre recurso (parm --name)

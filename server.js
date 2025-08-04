@@ -7,9 +7,9 @@ import cors from "cors";
 import registerAutomaticRoutes from "./registerAutomaticRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 // import noteRoutes from "./routes/noteRoutes.js";
-import scrapRoutes from "./routes/scrapRoutes.js";
+// import scrapRoutes from "./routes/scrapRoutes.js";
 import reboundRoutes from "./routes/reboundRoutes.js";
-import apiScrapRoutes from "./APIS/scrap/Routes.js";
+// import apiScrapRoutes from "./APIS/scrap/Routes.js";
 // import apiNoteRoutes from "./APIS/note/Routes.js";
 import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
@@ -17,7 +17,7 @@ dotenv.config();
 const PORT = process.env.PORT || 5050;
 const MONGO_URI = process.env.MONGODB_URI;
 const DIR_ROOT = path.dirname(fileURLToPath(import.meta.url));
-const DIR_FATHER_RESOURCES = path.join(DIR_ROOT, "midir");
+const DIR_FATHER_RESOURCES = path.join(DIR_ROOT, "APIS");
 
 const app = express();
 app.use(cors());
@@ -34,12 +34,12 @@ app.get("/", (req, res) => {
 });
 
 // Mount static routes (imported)
-app.use("/scrap", scrapRoutes);
+// app.use("/scrap", scrapRoutes);
 app.use("/rebound", reboundRoutes);
 app.use("/api/users", userRoutes);
 // app.use("/api/notes", apiNoteRoutes);
 // app.use("/api/notes", noteRoutes);
-app.use("/api/scraps", apiScrapRoutes);
+// app.use("/api/scraps", apiScrapRoutes);
 app.use("/static", staticPagesRoutes);
 // Mount dynamic routes
 await registerAutomaticRoutes(app, DIR_FATHER_RESOURCES, "/api");
@@ -54,15 +54,3 @@ app.listen(PORT, () => {
 });
 
 export default app;
-//----- Ejemplos de funciones para la extraccion de las partes de una URL ------------
-// const urlString = "https://www.example.com:8080/path/page.html?search=js&lang=en#section1";
-// const url = new URL(urlString);
-// console.log("href:", url.href);           // URL completa
-// console.log("protocol:", url.protocol);   // "https:"
-// console.log("host:", url.host);           // "www.example.com:8080"
-// console.log("hostname:", url.hostname);   // "www.example.com"
-// console.log("port:", url.port);           // "8080"
-// console.log("pathname:", url.pathname);   // "/path/page.html"
-// console.log("search:", url.search);       // "?search=js&lang=en"
-// console.log("hash:", url.hash);           // "#section1"
-// console.log("origin:", url.origin);       // "https://www.example.com:8080"

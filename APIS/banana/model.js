@@ -19,4 +19,4 @@ const resourceSchema = new mongoose.Schema(
 // Ejemplo: ['name', 'title']
 export const camposPermitidosBuscar = [];
 
-export default mongoose.model('Motor', resourceSchema);
+export default mongoose.model('Banana', resourceSchema);
