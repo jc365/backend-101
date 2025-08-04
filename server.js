@@ -1,10 +1,9 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
 import cors from "cors";
 import registerAutomaticRoutes from "./registerAutomaticRoutes.js";
+import { ROOT_DIR, pathJoin } from "./APIS/_nucleo/toolPaths.mjs";
 //-- Static routes
 import userRoutes from "./routes/userRoutes.js";
 // import noteRoutes from "./routes/noteRoutes.js";
@@ -17,8 +16,6 @@ import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 dotenv.config();
 const PORT = process.env.PORT || 5050;
 const MONGO_URI = process.env.MONGODB_URI;
-const DIR_ROOT = path.dirname(fileURLToPath(import.meta.url));
-const DIR_FATHER_RESOURCES = path.join(DIR_ROOT, "APIS");
 
 const app = express();
 app.use(cors());
@@ -27,14 +24,14 @@ app.use(express.json());
 // Conection with MongoDB-Atlas
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log("✅✅ Succesfully conect to MongoDB Atlas"))
+  .then(() => console.log("🔵 Succesfully conect to MongoDB Atlas"))
   .catch((error) => console.error("Error conecting to MongoDB:", error));
 
 app.get("/", (req, res) => {
   res.send("Server ready (id:sntmr101chrzdhi83xyk4u3se4jckldfjl)");
 });
 
-// Mount static routes (imported)
+//-- Mount static routes (imported)
 // app.use("/scrap", scrapRoutes);
 app.use("/rebound", reboundRoutes);
 app.use("/api/users", userRoutes);
@@ -42,8 +39,9 @@ app.use("/api/users", userRoutes);
 // app.use("/api/notes", noteRoutes);
 // app.use("/api/scraps", apiScrapRoutes);
 app.use("/static", staticPagesRoutes);
-// Mount dynamic routes
-await registerAutomaticRoutes(app, DIR_FATHER_RESOURCES, "/api");
+
+//-- Mount dynamic routes
+await registerAutomaticRoutes(app, pathJoin(ROOT_DIR, "APIS"));
 
 // Middleware for routes not found
 app.use((req, res) => {
@@ -51,7 +49,7 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅✅ Server listening at http://localhost:${PORT}`);
+  console.log(`🔵 Server listening at http://localhost:${PORT}`);
 });
 
 export default app;

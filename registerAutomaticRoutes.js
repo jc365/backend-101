@@ -1,6 +1,5 @@
 import fs from "fs";
-import path from "path";
-import { pathToFileURL } from "url";
+import { dynamicImport, pathJoin } from "./APIS/_nucleo/toolPaths.mjs";
 
 /**
  * Recorre el 'modulesBasePath' y en cada subdirectorio que encuentra, busca ficheros con el
@@ -19,25 +18,29 @@ export default async function registerAutomaticRoutes(
   const resources = fs
     .readdirSync(modulesBasePath)
     .filter((file) =>
-      fs.lstatSync(path.join(modulesBasePath, file)).isDirectory()
+      fs.lstatSync(pathJoin(modulesBasePath, file)).isDirectory()
     );
   for (const resource of resources) {
-    const resourcePath = path.join(modulesBasePath, resource);
+    const resourcePath = pathJoin(modulesBasePath, resource);
     const files = fs.readdirSync(resourcePath);
     const routeFiles = files.filter((f) => /^routes-v\d+\.js$/.test(f));
+
     for (const routeFile of routeFiles) {
       const versionMatch = routeFile.match(/^routes-(v\d+)\.js$/);
       if (!versionMatch) continue;
+
       const version = versionMatch[1];
-      const routePath = path.join(resourcePath, routeFile);
-      const routeURL = pathToFileURL(routePath).href;
+      const routePath = pathJoin(resourcePath, routeFile);
+
       try {
-        const { default: router } = await import(routeURL);
+        const { default: router } = await dynamicImport(routePath);
         app.use(`${prefix}/${version}/${resource}s`, router);
-        console.log(`✅ Ruta dinamica montada: ${prefix}/${version}/${resource}s`);
+        console.log(
+          `✅ Dynamic route mount: ${prefix}/${version}/${resource}s`
+        );
       } catch (err) {
         console.error(
-          `❌ Error montando ruta ${routeFile} para recurso ${resource}:`,
+          `❌ Error mounting route ${routeFile} by resource ${resource}\n`,
           err
         );
       }
