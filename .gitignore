@@ -5,8 +5,9 @@
 /.pnp
 .pnp.js
 
-# personalizacion
+# personalizacion y documentacion local
 .vscode
+docu-local
 
 # testing
 /coverage
