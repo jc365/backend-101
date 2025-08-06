@@ -299,7 +299,7 @@
         />
         <span id="pageTotal">/ 0</span>
         <span> (total notes found <span id="totalItems">0</span> )</span>
-        
+
         <button id="btnNext" disabled>Siguiente</button>
       </div>
 
@@ -492,8 +492,7 @@
             encodeURIComponent(query);
           document.getElementById("status").innerHTML = "";
         }
-        viewer.innerHTML =
-          `<em>Selecciona una nota para verla aquí…</em>
+        viewer.innerHTML = `<em>Selecciona una nota para verla aquí…</em>
            <hr><em>Backend para llamadas a APIs [ ${BACKEND}</em>
            <br><em> ....${url} ]</em>`;
 
@@ -504,6 +503,7 @@
             resultsUl.innerHTML = "";
             if (!result.data || result.data.length === 0) {
               resultsUl.innerHTML = "<li><em>No hay resultados.</em></li>";
+              renderPagination({}, {});
               return;
             }
 
@@ -531,6 +531,17 @@
         const pageInput = document.getElementById("pageInput");
         const pageTotal = document.getElementById("pageTotal");
         const totalItems = document.getElementById("totalItems");
+
+        if (!pag || Object.keys(pag).length === 0) {
+          // limpia paginación y deshabilita botones directamente
+          btnPrev.disabled = true;
+          btnNext.disabled = true;
+          pageInput.value = "";
+          pageInput.onchange = null;
+          pageTotal.textContent = "/ 0";
+          totalItems.textContent = "0";
+          return; 
+        }
 
         currentPage = links.self;
         btnPrev.disabled = !links.prev;
