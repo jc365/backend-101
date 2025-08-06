@@ -274,7 +274,7 @@
     </style>
   </head>
   <body>
-    <h1>Repositorio de Notas Markdown 📓 (v1.4)</h1>
+    <h1>Repositorio de Notas Markdown 📓 (v2.0)</h1>
 
     <div id="searchBar">
       <input
@@ -295,16 +295,11 @@
         <input
           type="number"
           id="pageInput"
-          zzmin="1"
-          zzvalue="1"
-          zzstyle="width: 60px; font-size: 1em; text-align: center"
           style="width: 40px; font-size: 1em; text-align: center"
         />
-
         <span id="pageTotal">/ 0</span>
-
         <span> (total notes found <span id="totalItems">0</span> )</span>
-
+        
         <button id="btnNext" disabled>Siguiente</button>
       </div>
 
@@ -340,8 +335,8 @@
 
     <script>
       const BACKEND = "http://localhost:5050";
-      const URL_PATH = "/api/v1/notes";
       // const BACKEND = "https://backend-101-hu0a.onrender.com";
+      const URL_PATH = "/api/v1/notes";
       const PAGE_SIZE = 4;
       let currentPage = 1;
       let lastQuery = "";
@@ -497,10 +492,11 @@
             encodeURIComponent(query);
           document.getElementById("status").innerHTML = "";
         }
-        resultsUl.innerHTML = "<li><em>Cargando…</em></li>";
+        // resultsUl.innerHTML = "<li><em>Cargando…</em></li>";
         viewer.innerHTML =
-          "<em>Selecciona una nota para verla aquí…</em>" +
-          `<hr><em>[ ...${url} ]</em>`;
+          `<em>Selecciona una nota para verla aquí…</em>
+           <hr><em>Backend para llamadas a APIs [ ${BACKEND}</em>
+           <br><em> ....${url} ]</em>`;
 
         fetch(`${BACKEND}${url}`)
           .then((r) => r.json())
@@ -536,7 +532,7 @@
         const pageInput = document.getElementById("pageInput");
         const pageTotal = document.getElementById("pageTotal");
         const totalItems = document.getElementById("totalItems");
-        
+
         currentPage = links.self;
         btnPrev.disabled = !links.prev;
         btnNext.disabled = !links.next;

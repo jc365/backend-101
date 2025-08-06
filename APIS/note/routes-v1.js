@@ -16,20 +16,21 @@ const validateObjectId = (req, res, next) => {
   next();
 };
 
-router.get("/search", ItemController.searchItem);
+//====================== R U T A S ==================================
+// Orden-1: rutas con nombre fijo (sin MW)
+router.get("/search", ItemController.searchNote);
 router.post("/upload", ItemController.uploadItem);
 
-//====================== R U T A S - B A S E ==================================
-// Primero las rutas con dos parámetros dinámicos (sin MW)
+// Orden-2: rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);
 
-// Luego las rutas con :id (con MW que valida formato del ID)
+// Orden-3: rutas con :id (con MW que valida formato del ID)
 router.get("/:id", validateObjectId, ItemController.obtenerItem);
 router.put("/:id", validateObjectId, ItemController.actualizarItem);
 router.patch("/:id", validateObjectId, ItemController.actualizarParcialItem);
 router.delete("/:id", validateObjectId, ItemController.borrarItem);
 
-// Finalmente rutas sin parametros (sin MW)
+// Orden-4: rutas sin parametros (sin MW)
 router.get("/", ItemController.listarItems);
 router.post("/", ItemController.crearItem);
 

@@ -8,10 +8,11 @@ import { sendSuccess, sendError, sanitizeValor } from "./common-utils.js";
 import paginate from "./paginate.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
-  const listarItems = async (req, res) => {
+   
+  const listarItems = async (req, res, filter = {}) => {
     try {
       const baseUrl = req.baseUrl + req.path;
-      const resultado = await paginate(Item, req, baseUrl);
+      const resultado = await paginate(Item, req, baseUrl, filter);
       return sendSuccess(
         res,
         resultado.data,

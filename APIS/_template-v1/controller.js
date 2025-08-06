@@ -1,6 +1,6 @@
-// Controller of resource
 import Item, { camposPermitidosBuscar } from "./model.js";
 import crudApiFactory from "../_nucleo/crudApiFactory.js";
+import * as commonUtils from "../_nucleo/common-utils.js";
 
 const baseController = crudApiFactory(Item, camposPermitidosBuscar);
 
