@@ -20,7 +20,6 @@
       #searchBar {
         display: flex;
         gap: 10px;
-        margin-bottom: 14px;
       }
       #searchInput {
         flex: 1 0 200px;
@@ -29,7 +28,7 @@
         border-radius: 6px;
         font-size: 1em;
       }
-      #btnSearch {
+      .btnSearch {
         padding: 7px 16px;
         border: none;
         background: #3250dd;
@@ -51,7 +50,7 @@
         min-height: 42px;
       }
       .result-card {
-        background: #f0f4ff;
+        background: #b9dbe3;
         border-radius: 8px;
         min-width: 210px;
         max-width: 320px;
@@ -72,23 +71,96 @@
         padding: 1px 2px;
         border-radius: 3px;
       }
-      #pagination {
-        margin-top: 18px;
-        font-size: 1.15em;
-        user-select: none;
+
+      /* Contenedor para paginacion y upload */
+      #bottomBar {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* espacio pequeño entre bloques */
+        flex-wrap: wrap; /* para evitar overflow horizontal */
       }
-      #pagination a,
-      #pagination span {
-        margin: 0 4px;
-        text-decoration: none;
-        color: #1a267a;
+
+      /* Bloque paginacion */
+      #paginationBlock {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 12px 18px;
+        min-width: 320px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #paginationBlock button {
+        min-width: 80px;
+        padding: 6px 12px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 6px;
+        background-color: #3250dd;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease;
+      }
+      #paginationBlock button:disabled {
+        background-color: #9aa9d6;
+        cursor: default;
+      }
+      #paginationBlock button:hover:not(:disabled) {
+        background-color: #263d9a;
+      }
+      #paginationBlock input[type="number"] {
+        border: 1px solid #bfc6d1;
+        border-radius: 6px;
+        height: 30px;
+      }
+
+      /* Bloque upload */
+      #uploadBlock {
+        max-width: 580px;
+        flex-grow: 1;
+        align-items: center;
+        gap: 10px;
+        box-sizing: border-box;
+      }
+      #uploadBlock #actions {
+        flex-shrink: 0;
+      }
+      #uploadBlock button#uploadBtn {
+        white-space: nowrap;
         cursor: pointer;
       }
-      #pagination span.current {
-        font-weight: bold;
-        background: #eaf0ff;
-        padding: 0 7px;
-        border-radius: 4px;
+      #uploadBlock label {
+        font-weight: 600;
+        font-size: 1em;
+        color: #004085;
+        user-select: none;
+        white-space: nowrap;
+      }
+      /* Clase para ocultar el botón manteniendo el espacio */
+      .hidden-button {
+        visibility: hidden;
+        pointer-events: none;
+        width: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Opcional: estilizar botón interno del input file en Chrome/Safari */
+      #uploadBlock input[type="file"]::-webkit-file-upload-button {
+        padding: 6px 12px;
+        border-radius: 6px;
+        background-color: #3250dd;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+      }
+      #uploadBlock input[type="file"]::-webkit-file-upload-button:hover {
+        background-color: #263d9a;
       }
 
       /* VISOR */
@@ -112,12 +184,11 @@
         position: absolute;
         top: 10px;
         right: 10px;
-        margin: 6px,
+        margin: 6px;
         display: flex;
         gap: 10px;
         z-index: 1000;
       }
-
       .botonera button {
         background-color: #3250dd;
         border: none;
@@ -129,7 +200,6 @@
         font-size: 0.9em;
         transition: background-color 0.3s ease;
       }
-
       .botonera button:hover {
         background-color: #263d9a;
       }
@@ -157,10 +227,9 @@
         border-radius: 3px;
       }
 
-      /* --- Añadimos estilos para el área de upload --- */
+      /* Área de upload */
       #upFiles {
-        margin-top: 20px;
-        margin-bottom: 6px;
+        margin-top: 10px;
       }
       #actions {
         margin-bottom: 14px;
@@ -191,36 +260,68 @@
           min-width: 95vw;
           max-width: 99vw;
         }
+        #bottomBar {
+          flex-direction: column;
+          gap: 10px;
+        }
+        #paginationBlock,
+        #uploadBlock {
+          min-width: auto;
+          max-width: 100%;
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <h1>Repositorio de Notas Markdown 📓 (v1.2)</h1>
+    <h1>Repositorio de Notas Markdown 📓 (v2.0)</h1>
 
     <div id="searchBar">
       <input
         type="text"
         id="searchInput"
-        placeholder="Buscar en notas…"
+        placeholder="Search in Notes (title and content). Put your text and <Intro> or click at button <Search> "
         autocomplete="off"
       />
-      <button id="btnSearch">Buscar</button>
+      <button id="btnSearch" class="btnSearch">Search</button>
+      <button id="btnCleanAndSearch" class="btnSearch">Clear + Search</button>
     </div>
 
-    <div id="pagination" style="margin-top: 16px; font-size: 1.2em"></div>
+    <div id="bottomBar">
+      <div id="paginationBlock">
+        <button id="btnPrev" disabled>Anterior</button>
 
-    <!-- Zona Upload -->
-    <label for="upFiles" style="margin-right: 8px">Upload al Repositorio ...</label>
-    <input
-      id="upFiles"
-      type="file"
-      accept=".md,.txt"
-      multiple
-      onchange="selectFiles()"
-    />
-    <div id="actions" style="display: none">
-      <button id="uploadBtn" onclick="startUpload()">Subir ficheros</button>
+        <span>Page</span>
+        <input
+          type="number"
+          id="pageInput"
+          style="width: 40px; font-size: 1em; text-align: center"
+        />
+        <span id="pageTotal">/ 0</span>
+        <span> (total notes found <span id="totalItems">0</span> )</span>
+
+        <button id="btnNext" disabled>Siguiente</button>
+      </div>
+
+      <div id="uploadBlock">
+        <label for="upFiles">Upload al Repositorio ...</label>
+
+        <input
+          id="upFiles"
+          type="file"
+          accept=".md,.txt"
+          multiple
+          onchange="selectFiles()"
+        />
+
+        <div id="actions">
+          <button id="uploadBtn" onclick="startUpload()" class="hidden-button">
+            Subir ficheros
+          </button>
+        </div>
+      </div>
     </div>
+
     <div id="status"></div>
 
     <!-- Contenedor para mensajes de respuesta -->
@@ -233,9 +334,10 @@
     </div>
 
     <script>
-      // const BACKEND = "http://localhost:5050"; //--render online
-      const BACKEND = "https://backend-101-hu0a.onrender.com"; //--render online
-      const PAGE_SIZE = 10;
+      // const BACKEND = "http://localhost:5050";
+      const BACKEND = "https://backend-101-hu0a.onrender.com";
+      const URL_PATH = "/api/v1/notes";
+      const PAGE_SIZE = 4;
       let currentPage = 1;
       let lastQuery = "";
 
@@ -243,16 +345,23 @@
       const btnSearch = document.getElementById("btnSearch");
       const resultsUl = document.getElementById("results");
       const viewer = document.getElementById("viewer");
-      const pagination = document.getElementById("pagination");
 
       // Variables subida
       let selectedFiles = [];
 
-      // Buscar notas al presionar Enter o click
       searchInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") searchNotes();
       });
-      btnSearch.addEventListener("click", searchNotes);
+
+      btnSearch.addEventListener("click", (e) => {
+        e.preventDefault();
+        searchNotes();
+      });
+
+      btnCleanAndSearch.addEventListener("click", (e) => {
+        e.preventDefault();
+        cleanAndSearch();
+      });
 
       // Gestión selección ficheros (upload)
       function selectFiles() {
@@ -261,10 +370,19 @@
         const status = document.getElementById("status");
 
         selectedFiles = Array.from(input.files);
-        actions.style.display = selectedFiles.length > 0 ? "block" : "none";
+        toggleUploadButton(selectedFiles.length > 0);
 
         // Limpiar status al seleccionar nuevos ficheros
         status.innerHTML = "";
+      }
+
+      function toggleUploadButton(show) {
+        const uploadBtn = document.getElementById("uploadBtn");
+        if (show) {
+          uploadBtn.classList.remove("hidden-button");
+        } else {
+          uploadBtn.classList.add("hidden-button");
+        }
       }
 
       // Función para mostrar mensajes
@@ -295,7 +413,7 @@
               content,
             };
 
-            const res = await fetch(`${BACKEND}/api/notes/upload`, {
+            const res = await fetch(`${BACKEND}${URL_PATH}/upload`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(doc),
@@ -308,15 +426,28 @@
             if (data.status === "success") {
               const operacion = data.operacion;
               if (operacion === "insert") {
-                mostrarMensaje(`Nota "${doc.filename}" creada correctamente.`, "success");
+                mostrarMensaje(
+                  `Nota "${doc.filename}" creada correctamente.`,
+                  "success"
+                );
               } else if (operacion === "update") {
-                mostrarMensaje(`Nota "${doc.filename}" actualizada correctamente.`, "success");
+                mostrarMensaje(
+                  `Nota "${doc.filename}" actualizada correctamente.`,
+                  "success"
+                );
               }
 
               status.innerHTML += `<div style="color:green;">✔ ${file.name} subido correctamente</div>`;
             } else {
-              mostrarMensaje(`Error con "${doc.filename}": ${data.message || "Error desconocido"}`, "error");
-              status.innerHTML += `<div style="color:red;">✘ Error con ${file.name}: ${data.message || "Error desconocido"}</div>`;
+              mostrarMensaje(
+                `Error con "${doc.filename}": ${
+                  data.message || "Error desconocido"
+                }`,
+                "error"
+              );
+              status.innerHTML += `<div style="color:red;">✘ Error con ${
+                file.name
+              }: ${data.message || "Error desconocido"}</div>`;
             }
           } catch (e) {
             mostrarMensaje(`Error con "${file.name}": ${e.message}`, "error");
@@ -328,7 +459,7 @@
         // Limpiar selección y esconder botón
         selectedFiles = [];
         document.getElementById("upFiles").value = "";
-        document.getElementById("actions").style.display = "none";
+        toggleUploadButton(false);
       }
 
       // Función que resalta texto en títulos (texto plano)
@@ -337,36 +468,46 @@
         let terms = query.toLowerCase().split(/\s+/).filter(Boolean);
         let re = new RegExp(
           "(" +
-            terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") +
+            terms
+              .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+              .join("|") +
             ")",
           "gi"
         );
         return text.replace(re, "<mark>$1</mark>");
       }
 
-      // Función de búsqueda de notas
-      function searchNotes(page = 1) {
-        const query = searchInput.value.trim();
-        document.getElementById("status").innerHTML = "";
-        resultsUl.innerHTML = "<li><em>Cargando…</em></li>";
-        pagination.innerHTML = "";
-        viewer.innerHTML = "<em>Selecciona una nota para verla aquí…</em>";
-        lastQuery = query;
-        currentPage = page;
+      function cleanAndSearch() {
+        searchInput.value = "";
+        searchNotes();
+      }
 
-        fetch(
-          `${BACKEND}/api/notes/search?q=${encodeURIComponent(
-            query
-          )}&page=${page}&pageSize=${PAGE_SIZE}`
-        )
+      // Función de búsqueda de notas
+      function searchNotes(url) {
+        let query = "";
+        if (!url) {
+          query = searchInput.value.trim();
+          url =
+            `${URL_PATH}/search?&mode=page&page_size=4&q=` +
+            encodeURIComponent(query);
+          document.getElementById("status").innerHTML = "";
+        }
+        viewer.innerHTML = `<em>Selecciona una nota para verla aquí…</em>
+           <hr><em>Backend para llamadas a APIs [ ${BACKEND}</em>
+           <br><em> ....${url} ]</em>`;
+
+        fetch(`${BACKEND}${url}`)
           .then((r) => r.json())
-          .then((data) => {
+          .then((result) => {
+            lastQuery = query;
             resultsUl.innerHTML = "";
-            if (!data.items || data.items.length === 0) {
+            if (!result.data || result.data.length === 0) {
               resultsUl.innerHTML = "<li><em>No hay resultados.</em></li>";
+              renderPagination({}, {});
               return;
             }
-            data.items.forEach((note) => {
+
+            result.data.forEach((note) => {
               const li = document.createElement("li");
               li.className = "result-card";
               li.innerHTML = highlight(note.title, query);
@@ -374,7 +515,8 @@
               li.onclick = () => loadNote(note._id);
               resultsUl.appendChild(li);
             });
-            renderPagination(data.total, page, data.pageSize, query);
+
+            renderPagination(result.pagination, result.links);
           })
           .catch((err) => {
             resultsUl.innerHTML = "<li><em>Error buscando notas…</em></li>";
@@ -383,35 +525,50 @@
       }
 
       // Paginación
-      function renderPagination(total, page, pageSize, query) {
-        pagination.innerHTML = "";
-        const lastPage = Math.ceil(total / pageSize);
-        if (lastPage <= 1) return;
-        for (let i = 1; i <= lastPage; i++) {
-          if (i === page) {
-            const span = document.createElement("span");
-            span.className = "current";
-            span.textContent = i;
-            pagination.appendChild(span);
-          } else {
-            const a = document.createElement("a");
-            a.textContent = i;
-            a.href = "#";
-            a.onclick = (e) => {
-              e.preventDefault();
-              searchNotes(i);
-            };
-            pagination.appendChild(a);
-          }
+      function renderPagination(pag, links) {
+        const btnPrev = document.getElementById("btnPrev");
+        const btnNext = document.getElementById("btnNext");
+        const pageInput = document.getElementById("pageInput");
+        const pageTotal = document.getElementById("pageTotal");
+        const totalItems = document.getElementById("totalItems");
+
+        if (!pag || Object.keys(pag).length === 0) {
+          // limpia paginación y deshabilita botones directamente
+          btnPrev.disabled = true;
+          btnNext.disabled = true;
+          pageInput.value = "";
+          pageInput.onchange = null;
+          pageTotal.textContent = "/ 0";
+          totalItems.textContent = "0";
+          return; 
         }
+
+        currentPage = links.self;
+        btnPrev.disabled = !links.prev;
+        btnNext.disabled = !links.next;
+
+        pageInput.value = pag.page;
+        pageInput.min = 1;
+        pageInput.max = pag.total_pages;
+        pageTotal.textContent = `/ ${pag.total_pages}`;
+        totalItems.textContent = pag.total;
+
+        btnPrev.onclick = links.prev ? () => searchNotes(links.prev) : null;
+        btnNext.onclick = links.next ? () => searchNotes(links.next) : null;
+
+        pageInput.onchange = () => {
+          let desiredPage = parseInt(pageInput.value);
+          searchNotes(links.last.replace(/(page=)(\d+)/, `$1${desiredPage}`));
+        };
       }
 
       // Carga nota y la muestra con resaltado en título y contenido
       function loadNote(id) {
         viewer.innerHTML = "<em>Cargando nota…</em>";
-        fetch(`${BACKEND}/api/notes/${id}`)
+        fetch(`${BACKEND}${URL_PATH}/${id}`)
           .then((res) => res.json())
-          .then((note) => {
+          .then((result) => {
+            const note = result.data;
             const tagsHtml =
               note.tags && note.tags.length > 0
                 ? `<div class="tags">${note.tags
@@ -419,7 +576,6 @@
                     .join("")}</div>`
                 : "";
 
-            // Botonera posicionada en la esquina superior derecha
             viewer.innerHTML = `
               <div class="botonera">
                 <button id="editTitleBtn">Editar título</button>
@@ -436,7 +592,8 @@
               const url = URL.createObjectURL(blob);
               const a = document.createElement("a");
               a.href = url;
-              a.download = note.filename || note.title.replace(/\s+/g, "_") + ".md";
+              a.download =
+                note.filename || note.title.replace(/\s+/g, "_") + ".md";
               document.body.appendChild(a);
               a.click();
               setTimeout(() => {
@@ -448,8 +605,12 @@
             // EDITAR TÍTULO
             document.getElementById("editTitleBtn").onclick = () => {
               const newTitle = prompt("Editar título de la nota:", note.title);
-              if (newTitle && newTitle.trim() !== "" && newTitle !== note.title) {
-                fetch(`${BACKEND}/api/notes/${id}`, {
+              if (
+                newTitle &&
+                newTitle.trim() !== "" &&
+                newTitle !== note.title
+              ) {
+                fetch(`${BACKEND}${URL_PATH}/${id}`, {
                   method: "PATCH",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ title: newTitle.trim() }),
@@ -477,13 +638,14 @@
                   "¿Estás seguro de querer borrar esta nota? Esta acción no se puede deshacer."
                 )
               ) {
-                fetch(`${BACKEND}/api/notes/${id}`, {
+                fetch(`${BACKEND}${URL_PATH}/${id}`, {
                   method: "DELETE",
                 })
                   .then((res) => {
                     if (!res.ok) throw new Error(`HTTP ${res.status}`);
                     mostrarMensaje("Nota borrada correctamente", "success");
-                    viewer.innerHTML = "<em>Selecciona una nota para verla aquí…</em>";
+                    viewer.innerHTML =
+                      "<em>Selecciona una nota para verla aquí…</em>";
                     searchNotes(currentPage); // refresca listado
                   })
                   .catch((err) => {
@@ -497,7 +659,6 @@
             const contentEl = document.getElementById("noteContent");
             if (contentEl) {
               const markInstance = new Mark(contentEl);
-
               markInstance.unmark({
                 done: () => {
                   if (lastQuery) {
@@ -516,7 +677,10 @@
               });
             }
 
-            window.scrollTo({ top: viewer.offsetTop - 30, behavior: "smooth" });
+            window.scrollTo({
+              top: viewer.offsetTop - 30,
+              behavior: "smooth",
+            });
           })
           .catch((err) => {
             viewer.innerHTML = "<em>Error cargando nota.</em>";
@@ -524,9 +688,6 @@
             console.error(err);
           });
       }
-
-      // Puedes descomentar para lanzar búsqueda al cargar la página
-      // searchNotes();
     </script>
   </body>
 </html>
