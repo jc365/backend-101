@@ -23,7 +23,7 @@ const CONTEXT = {
   NODE_ENV,
   BACKEND_URL,
 };
-console.log("Execution context:", CONTEXT);
+console.log("\nExecution context:", CONTEXT);
 
 const app = express();
 app.use(cors());
