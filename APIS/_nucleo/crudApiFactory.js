@@ -9,10 +9,10 @@ import paginate from "./paginate.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
    
-  const listarItems = async (req, res, filter = {}) => {
+  const listarItems = async (req, res) => {
     try {
       const baseUrl = req.baseUrl + req.path;
-      const resultado = await paginate(Item, req, baseUrl, filter);
+      const resultado = await paginate(Item, req, baseUrl, {});
       return sendSuccess(
         res,
         resultado.data,

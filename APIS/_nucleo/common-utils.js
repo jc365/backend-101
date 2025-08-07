@@ -24,10 +24,10 @@ export function sendSuccess(
 ) {
   return res.status(code).json({
     status: "success",
+    message,
     pagination,
     links,
     data,
-    message,
   });
 }
 

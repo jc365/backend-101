@@ -10,7 +10,7 @@ import reboundRoutes from "./routes/reboundRoutes.js";
 import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
 dotenv.config();
-const PORT = process.env.PORT || 5050;
+const PORT = process.env.PORT || 10000;
 const NODE_ENV = process.env.NODE_ENV || "production";
 const MONGO_URI = process.env.MONGODB_URI;
 const BACKEND_URL =

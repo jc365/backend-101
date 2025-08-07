@@ -90,7 +90,6 @@ const fileRestart = path.join(
   DIR_NUCLEO,
   FILE_RESTART
 );
-console.log(fileRestart);
 let restarContent = fs.readFileSync(fileRestart, "utf-8");
 fs.writeFileSync(fileRestart, restarContent);
 
@@ -114,7 +113,7 @@ console.log(
   "[*] Si quieres desactivar el montaje automatico, renombre el fichero"
 );
 console.log(
-  "[*]    de rutas deseado, anteponiendo un guion bajo a su nombre (_routes-vX.js"
+  "[*]    de rutas deseado, anteponiendo un guion_bajo a su nombre (_routes-vX.js"
 );
 // console.log("[*] Para activar/registrar un fichero de rutas en el server:");
 // console.log("[*]   1. Elimina el guion bajo del fichero de rutas..");
