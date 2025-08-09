@@ -537,7 +537,7 @@
               resultsUl.appendChild(li);
             });
 
-            renderPagination(result.pagination, result.links);
+            renderPagination(result._pagination, result._links);
           })
           .catch((err) => {
             resultsUl.innerHTML = "<li><em>Error buscando notas…</em></li>";

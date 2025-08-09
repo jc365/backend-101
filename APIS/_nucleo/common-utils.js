@@ -25,8 +25,8 @@ export function sendSuccess(
   return res.status(code).json({
     status: "success",
     message,
-    pagination,
-    links,
+    _pagination: pagination,
+    _links: links,
     data,
   });
 }
