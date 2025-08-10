@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>API Factory</title>
+
+    <!-- Librerías -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mark.js/dist/mark.min.js"></script>
+
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 20px;
+        background: #f7f7fa;
+      }
+      h1 {
+        font-weight: 400;
+      }
+      #searchBar {
+        display: flex;
+        gap: 10px;
+      }
+      #searchInput {
+        flex: 1 0 200px;
+        padding: 7px 12px;
+        border: 1px solid #bfc6d1;
+        border-radius: 6px;
+        font-size: 1em;
+      }
+      .btnSearch {
+        padding: 7px 16px;
+        border: none;
+        background: #3250dd;
+        color: #fff;
+        font-size: 1em;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+      #btnSearch:active {
+        background: #263d9a;
+      }
+      #results {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        list-style: none;
+        padding: 0;
+        min-height: 42px;
+      }
+      .result-card {
+        background: #b9dbe3;
+        border-radius: 8px;
+        min-width: 210px;
+        max-width: 320px;
+        padding: 14px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        cursor: pointer;
+        transition: box-shadow 0.15s;
+        border: 1px solid #e2e8f0;
+        font-size: 1.07em;
+      }
+      .result-card:hover {
+        box-shadow: 0 4px 16px rgba(32, 64, 220, 0.15);
+        border-color: #b0c4f7;
+        background: #eaf0ff;
+      }
+      .result-card mark {
+        background: #ffe570;
+        padding: 1px 2px;
+        border-radius: 3px;
+      }
+
+      /* Contenedor para paginacion y upload */
+      #bottomBar {
+        display: flex;
+        align-items: center;
+        gap: 20px; /* espacio pequeño entre bloques */
+        flex-wrap: wrap; /* para evitar overflow horizontal */
+      }
+
+      /* Bloque paginacion */
+      #paginationBlock {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 12px 18px;
+        min-width: 320px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #paginationBlock button {
+        min-width: 80px;
+        padding: 6px 12px;
+        font-size: 1em;
+        cursor: pointer;
+        border-radius: 6px;
+        background-color: #3250dd;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease;
+      }
+      #paginationBlock button:disabled {
+        background-color: #9aa9d6;
+        cursor: default;
+      }
+      #paginationBlock button:hover:not(:disabled) {
+        background-color: #263d9a;
+      }
+      #paginationBlock input[type="number"] {
+        border: 1px solid #bfc6d1;
+        border-radius: 6px;
+        height: 30px;
+      }
+
+      /* Bloque upload */
+      #uploadBlock {
+        max-width: 580px;
+        flex-grow: 1;
+        align-items: center;
+        gap: 10px;
+        box-sizing: border-box;
+      }
+      #uploadBlock #actions {
+        flex-shrink: 0;
+      }
+      #uploadBlock button#uploadBtn {
+        white-space: nowrap;
+        cursor: pointer;
+      }
+      #uploadBlock label {
+        font-weight: 600;
+        font-size: 1em;
+        color: #004085;
+        user-select: none;
+        white-space: nowrap;
+      }
+      /* Clase para ocultar el botón manteniendo el espacio */
+      .hidden-button {
+        visibility: hidden;
+        pointer-events: none;
+        width: 0;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Opcional: estilizar botón interno del input file en Chrome/Safari */
+      #uploadBlock input[type="file"]::-webkit-file-upload-button {
+        padding: 6px 12px;
+        border-radius: 6px;
+        background-color: #3250dd;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+      }
+      #uploadBlock input[type="file"]::-webkit-file-upload-button:hover {
+        background-color: #263d9a;
+      }
+
+      /* VISOR */
+      #viewer {
+        margin-top: 38px;
+        padding: 25px 18px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        min-height: 170px;
+        background: #fff;
+        box-shadow: 0 4px 12px #eee;
+        max-width: 900px;
+        font-size: 1.07em;
+        word-break: break-word;
+        overflow-x: auto;
+        position: relative; /* Para posicionar botones */
+      }
+
+      /* Botonera posición esquina superior derecha */
+      .botonera {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        margin: 6px;
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+      }
+      .botonera button {
+        background-color: #3250dd;
+        border: none;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.9em;
+        transition: background-color 0.3s ease;
+      }
+      .botonera button:hover {
+        background-color: #263d9a;
+      }
+
+      /* Estilo para tags */
+      .tags {
+        margin-bottom: 14px;
+      }
+      .tags .tag {
+        display: inline-block;
+        background-color: #cce5ff;
+        color: #004085;
+        padding: 3px 8px;
+        margin: 0 6px 6px 0;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: 600;
+        user-select: none;
+      }
+
+      /* Estilos para mark.js resaltado (contenido) */
+      mark {
+        background-color: #ffe570;
+        padding: 1px 2px;
+        border-radius: 3px;
+      }
+
+      /* Área de upload */
+      #upFiles {
+        margin-top: 10px;
+      }
+      #actions {
+        margin-bottom: 14px;
+      }
+      #status div {
+        margin-bottom: 4px;
+        font-family: monospace;
+      }
+
+      /* Mensajes de estado */
+      #mensaje {
+        margin-bottom: 12px;
+        font-weight: bold;
+      }
+      #mensaje.success {
+        color: green;
+      }
+      #mensaje.error {
+        color: red;
+      }
+
+      @media (max-width: 650px) {
+        #viewer,
+        #results {
+          max-width: 99vw;
+        }
+        .result-card {
+          min-width: 95vw;
+          max-width: 99vw;
+        }
+        #bottomBar {
+          flex-direction: column;
+          gap: 10px;
+        }
+        #paginationBlock,
+        #uploadBlock {
+          min-width: auto;
+          max-width: 100%;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <p>v0.2</p>
+    <div id="viewer"></div>
+    <footer>v0.1</footer>
+    <script>
+      let BACKEND = "https://backend-101-hu0a.onrender.com";
+      BACKEND = "http://localhost:5050";
+      const URL_PATH = "/api/v1/notes";
+      const viewer = document.getElementById("viewer");
+      loadNote("6898d979d583fa47f5837575");
+
+      // Carga nota y la muestra usando formato Markdown
+      function loadNote(id) {
+        viewer.innerHTML = "<em>Cargando nota…</em>";
+        fetch(`${BACKEND}${URL_PATH}/${id}`)
+          .then((res) => res.json())
+          .then((result) => {
+            const note = result.data.content;
+            const noteChanged = reemplazarAvanzado(note, "item", "resource");
+            const noteParseado = marked.parse(noteChanged);
+            viewer.innerHTML = `<div id="noteContent">${noteParseado}</div>`;
+          })
+          .catch((err) => {
+            viewer.innerHTML = "<em>Error cargando nota.</em>";
+            console.error(err);
+          });
+      }
+
+      /**
+       * Reemplaza todas las ocurrencias de un texto por otro en un string.
+       * Por defecto, respeta los formatos de origen (mayusculas, minusculas, capital inicial) haciendo la sustitucion 
+       * que corresponda. Pero pasando el parm <sensibleFormatoOrigen> a false, realiza un replace tradicional
+       * @param {string} contenido - Texto original (puede ser el contenido completo de un fichero leido previamente)
+       * @param {string} buscar - Texto a buscar
+       * @param {string} reemplazar - Texto nuevo que sustituirá al buscado
+       * @param {boolean} sensibleFormatoOrigen - [True: Reemplazo segun el formato de origen / False: Reemplazo exacto del texto a buscar]
+       * @returns {string} Texto con todos los reemplazos aplicados
+       */
+      function reemplazarAvanzado(
+        contenido,
+        buscar,
+        reemplazar,
+        sensibleFormatoOrigen = true
+      ) {
+        const textoEscapado = buscar.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+        if (!sensibleFormatoOrigen) {
+          const regex = new RegExp(textoEscapado, "g"); // bandera "g" = reemplazo global
+          return contenido.replace(regex, reemplazar);
+        }
+
+        const regex = new RegExp(textoEscapado, "gi"); // i = insensitive, g = global
+        return contenido.replace(regex, (coincidencia) => {
+          if (coincidencia === coincidencia.toUpperCase()) {
+            // TODO EN MAYÚSCULAS
+            return reemplazar.toUpperCase();
+          } else if (coincidencia === coincidencia.toLowerCase()) {
+            // todo en minúsculas
+            return reemplazar.toLowerCase();
+          } else if (
+            coincidencia[0] === coincidencia[0].toUpperCase() &&
+            coincidencia.slice(1) === coincidencia.slice(1).toLowerCase()
+          ) {
+            // Capital Inicial
+            return (
+              reemplazar.charAt(0).toUpperCase() +
+              reemplazar.slice(1).toLowerCase()
+            );
+          } else {
+            // Otros casos (mezclas raras de mayúsculas/minúsculas)
+            return reemplazar;
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

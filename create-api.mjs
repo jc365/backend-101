@@ -4,7 +4,7 @@
  */
 import fs from "fs";
 import path from "path";
-import minimist from "minimist";
+// import minimist from "minimist";
 import { fileURLToPath } from "url";
 
 const DIR_FATHER_RESOURCES = "APIS";
@@ -113,10 +113,6 @@ console.log(
   "[*] Si quieres desactivar el montaje automatico, renombre el fichero"
 );
 console.log(
-  "[*]    de rutas deseado, anteponiendo un guion_bajo a su nombre (_routes-vX.js"
+  "[*]    de rutas deseado, anteponiendo un guion_bajo a su nombre (_routes-vX.js)"
 );
-// console.log("[*] Para activar/registrar un fichero de rutas en el server:");
-// console.log("[*]   1. Elimina el guion bajo del fichero de rutas..");
-// console.log("[*]   2. Para y vuelve a arrancar el server con <npm run div>");
-// console.log("[*]   3. Las rutas son registradas automaticamente");
 console.log("");
