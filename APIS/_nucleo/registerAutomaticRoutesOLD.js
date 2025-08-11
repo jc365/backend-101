@@ -1,6 +1,15 @@
 import fs from "fs";
-import { dynamicImport, pathJoin, documentationAdapted } from "./toolPaths.mjs";
+import { dynamicImport, pathJoin } from "./toolPaths.mjs";
 
+/**
+ * Recorre el 'modulesBasePath' y en cada subdirectorio que encuentra, busca ficheros con el
+ * patron 'routes-vX'. Cada vez que encuentra uno, lo importa dinamicamente y lo monta en
+ * <{prefix}/{version}/{resource}s>  (el nombre del recurso lo toma del directorio).
+ * Para desactivar este registro automatico, renombra 'routes-vX' a '_routes-vX'
+ * @param {*} app
+ * @param {*} modulesBasePath
+ * @param {*} prefix
+ */
 export default async function registerAutomaticRoutes(
   app,
   modulesBasePath,
@@ -11,7 +20,6 @@ export default async function registerAutomaticRoutes(
     .filter((file) =>
       fs.lstatSync(pathJoin(modulesBasePath, file)).isDirectory()
     );
-
   for (const resource of resources) {
     const resourcePath = pathJoin(modulesBasePath, resource);
     const files = fs.readdirSync(resourcePath);
@@ -26,22 +34,10 @@ export default async function registerAutomaticRoutes(
 
       try {
         const { default: router } = await dynamicImport(routePath);
-        const fullRoute = `${prefix}/${version}/${resource}s`; //--pluraliza las rutas
-        const docRoute = `${fullRoute}/docu`;
-
-        // Ruta de documentación vinculada a este recurso/version
-        app.get(docRoute, (req, res) => {
-          const singular = resource.endsWith("s")
-          ? resource.slice(0, -1)
-          : resource;
-          const html = documentationAdapted(singular, version);
-          res.type("html").send(html);
-        });
-        console.log(`📄 Documen route mount: ${docRoute}`);
-
-        // Rutas del fichero de rutas
-        app.use(fullRoute, router);
-        console.log(`✅ Dynamic route mount: ${fullRoute}`);
+        app.use(`${prefix}/${version}/${resource}s`, router);
+        console.log(
+          `✅ Dynamic route mount: ${prefix}/${version}/${resource}s`
+        );
       } catch (err) {
         console.error(
           `❌ Error mounting route ${routeFile} by resource ${resource}\n`,

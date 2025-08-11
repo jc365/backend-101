@@ -18,7 +18,6 @@ const validateObjectId = (req, res, next) => {
 
 //====================== R U T A S ==================================
 // Orden-1: rutas con nombre fijo (sin MW)
-router.get("/docu", ItemController.getDocumentation);
 router.get("/search", ItemController.searchNote);
 router.post("/upload", ItemController.uploadItem);
 

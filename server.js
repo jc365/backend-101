@@ -38,10 +38,12 @@ mongoose
 //========  R U T A S  ==========
 //-- Root route - Ready message with identification
 app.get("/", (req, res) => res.send("Server ready (id:sntmr101chrzdhi83jld)"));
+
 //-- Mount static routes (depending on import's)
 app.use("/scrap", scrapRoutes); //--usada desde el front de app-jobs
 app.use("/rebound", reboundRoutes);
 app.use("/static", staticPagesRoutes);
+
 //-- Mount dynamic routes (depending on directories structure)
 await registerAutomaticRoutes(app, pathJoin(ROOT_DIR, "APIS"));
 

@@ -5,7 +5,6 @@
 // aunque esta especializado para el elemento al que da funcionalidad.
 
 import paginate from "./paginate.js";
-import { documentationAdapted } from "./toolPaths.mjs";
 import { sendSuccess, sendError, sanitizeValor } from "./common-utils.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
@@ -124,16 +123,6 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
     }
   };
 
-  const getDocumentation = async (req, res) => {
-    const partes = req.baseUrl.split("/"); 
-    const version = partes[2]; // "v1"
-    let resource = partes[3]; // "resource"
-    // Singularizar simple: quitar 's' final
-    if (resource.endsWith("s")) resource = resource.slice(0, -1);
-    const htmlAdapted = documentationAdapted(resource, version);
-    res.type("html").send(htmlAdapted);
-  };
-
   return {
     listarItems,
     crearItem,
@@ -142,7 +131,6 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
     actualizarParcialItem,
     borrarItem,
     buscarPorCampo,
-    getDocumentation,
   };
 };
 

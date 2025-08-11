@@ -18,7 +18,6 @@ const validateObjectId = (req, res, next) => {
 
 //====================== R U T A S ==================================
 // Orden-1: rutas con nombre fijo (sin MW)
-router.get("/docu", ItemController.getDocumentation);
 
 // Orden-2: rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);
