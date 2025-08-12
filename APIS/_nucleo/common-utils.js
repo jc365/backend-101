@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 // Funcion para crear la sintaxis de busqueda combinada de varios textos en varios
 // campos que necesita una query Mongo
 export function buildFilter(terms, fields) {
@@ -100,4 +102,20 @@ export function sanitizeValor(input) {
   if (typeof input !== "string") return input;
   if (input.includes("$") || input.includes(".")) return null;
   return input;
+}
+
+/**
+ * MiddleWare que valida si el Id pasado como parametro de una ruta cumple
+ * con el formato y longitud que utiliza Mongo (antes de hacer la query).
+ */
+export function validateObjectIdMW(req, res, next) {
+  const id = req.params.id;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({
+      status: "error",
+      data: null,
+      message: "ID inválido",
+    });
+  }
+  next();
 }

@@ -1,6 +1,6 @@
 import puppeteer from 'puppeteer';
-import { analyzeTags } from '../../utils/tagAnalyzer.js'
-import { collectTags } from '../../utils/tagCollect.js'
+import { analyzeTags } from './tagAnalyzer.js'
+import { collectTags } from './tagCollect.js'
 
 export async function dynamicScraper(url) {
   try {

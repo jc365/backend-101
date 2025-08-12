@@ -5,6 +5,8 @@ const router = express.Router();
 
 //====================== R U T A S ==================================
 // Orden-1: rutas con nombre fijo (sin MW)
+router.get("/unread/:alias", ItemController.fxRouteUnread);
+router.post("/mark-read", ItemController.fxRouteMarkRead);
 
 // Orden-2: rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { analyzeTags } from "../tagAnalyzer.js";
-import { collectTags } from "../tagCollect.js";
+import { analyzeTags } from "./tagAnalyzer.js";
+import { collectTags } from "./tagCollect.js";
 
 export async function staticScraper(url) {
   console.log('ejecutando staticScraper', url);

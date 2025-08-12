@@ -5,7 +5,7 @@ import cors from "cors";
 import registerAutomaticRoutes from "./APIS/_nucleo/registerAutomaticRoutes.js";
 import { ROOT_DIR, pathJoin } from "./APIS/_nucleo/toolPaths.mjs";
 //-- Static routes
-import scrapRoutes from "./routes/scrapRoutes.js";
+// import scrapRoutes from "./routes/scrapRoutes.js";
 import reboundRoutes from "./routes/reboundRoutes.js";
 import staticPagesRoutes from "./routes/staticPagesRoutes.js";
 
@@ -40,7 +40,7 @@ mongoose
 app.get("/", (req, res) => res.send("Server ready (id:sntmr101chrzdhi83jld)"));
 
 //-- Mount static routes (depending on import's)
-app.use("/scrap", scrapRoutes); //--usada desde el front de app-jobs
+// app.use("/scrap", scrapRoutes); //--usada desde el front de app-jobs
 app.use("/rebound", reboundRoutes);
 app.use("/static", staticPagesRoutes);
 

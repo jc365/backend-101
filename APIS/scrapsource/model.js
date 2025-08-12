@@ -1,0 +1,37 @@
+// Ejemplo
+// {
+//   "_id": "ObjectId",
+//   "alias": "bbva_job_list",
+//   "url": "https://bbva.wd3.myworkdayjobs.com/es-ES/Trabaja_con_nosotros",
+//   "mode": "prod",
+//   "active": true,
+//   "source": "https://bbva.wd3.myworkdayjobs.com",
+//   "listPipeline": [ ... ],
+//   "detailPipeline": [ ... ],
+//   "createdAt": "2025-08-12T17:00:00Z",
+//   "updatedAt": "2025-08-12T17:00:00Z"
+// }
+
+// Model of scrapSources
+import mongoose from "mongoose";
+
+const resourceSchema = new mongoose.Schema(
+  {
+    alias: { type: String, required: true, index: true },
+    url: { type: String, required: true },
+    mode: { type: String, enum: ["prod", "test"], default: "test" },
+    active: { type: Boolean, default: true },
+    source: { type: String }, // prefijo para URLs relativas
+    listPipeline: { type: Array, required: true }, // array de steps (JSON)
+    detailPipeline: { type: Array, required: true }, // array de steps (JSON)
+  },
+  { timestamps: true }
+);
+
+// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
+// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
+// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
+// Ejemplo: ['name', 'title']
+export const camposPermitidosBuscar = [];
+
+export default mongoose.model("ScrapSource", resourceSchema);
