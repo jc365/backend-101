@@ -18,7 +18,7 @@ const validateObjectId = (req, res, next) => {
 
 //====================== R U T A S ==================================
 // Orden-1: rutas con nombre fijo (sin MW)
-router.post("/run-two-phase/:alias", ItemController.runTwoPhases);
+router.post("/run-two-phases/:alias", ItemController.runTwoPhases);
 
 // Orden-2: rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);

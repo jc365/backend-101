@@ -166,7 +166,7 @@ function extractJobDetailsBBVA(html) {
   const title = $('h2[data-automation-id="jobPostingHeader"]').text().trim();
   if (title) result.title = title;
 
-  // Extrae los detalles del puesto (tipo clave:valor)
+  // Extrae los detalles clave:valor
   result.summary = {};
   $(".css-1pv4c4t")
     .find("dt")
@@ -178,40 +178,93 @@ function extractJobDetailsBBVA(html) {
       }
     });
 
-  // Extrae info detallada de secciones
-  //--- Set del padre de las secciones
+  // Función de normalización (quita acentos, trim, espacios únicos, minúsculas)
+  const normalize = (t) =>
+    t
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  // Div contenedor de descripción
   const detailsDiv = $('[data-automation-id="jobPostingDescription"]');
-  //--- Set de Secciones a extraer
-  const sections = [
-    "Essential Qualifications & Experience",
-    "Preferred Attributes",
-  ];
 
-  // Funcion de normalizacion para compatibilizar el filtrado
-  const normalize = (t) => t.replace(/\s+/g, " ").trim().toLowerCase();
+  // Extraer secciones dinámicas y filtrar no deseadas
+  detailsDiv.children().each((_, child) => {
+    const node = $(child);
+    let headingText = "";
 
-  sections.forEach((block) => {
-    const titleElem = detailsDiv
-      .find("b")
-      .filter((_, el) => normalize($(el).text()) === normalize(block))
-      .first();
+    if (node.is("p") && node.find("b").length) {
+      headingText = node.find("b").first().text().trim();
+    } else if (node.is("h2,h3,h4,h5")) {
+      headingText = node.text().trim();
+    }
 
-    if (titleElem.length) {
-      // Subir al <p> y coger el primer <ul> siguiente
-      const ulElem = titleElem.closest("p").nextAll("ul").first();
-      if (ulElem.length) {
-        const items = ulElem
-          .find("li")
-          .map((_, li) => $(li).text().trim())
-          .get();
-        if (items.length) {
-          result[block] = items;
-        }
+    if (!headingText) return;
+
+    const normHeading = normalize(headingText);
+    if (
+      normHeading.includes("hacer crecer tu carrera") ||
+      normHeading.includes("conoce mas sobre el")
+    ) {
+      return;
+    }
+
+    // Extraer contenido de la sección
+    const sectionKey = headingText;
+    const items = [];
+    let sibling = node.next();
+
+    while (sibling.length) {
+      const tag = sibling.get(0).tagName.toLowerCase();
+      const isNewHeading =
+        (sibling.is("p") && sibling.find("b").length) ||
+        ["h2", "h3", "h4", "h5"].includes(tag);
+      if (isNewHeading) break;
+
+      if (sibling.is("ul")) {
+        sibling.find("li").each((_, li) => {
+          const text = $(li).text().trim();
+          if (text) items.push(text);
+        });
+      } else if (sibling.is("p")) {
+        const txt = sibling.text().trim();
+        if (txt) items.push(txt);
       }
+
+      sibling = sibling.next();
+    }
+
+    if (items.length) {
+      result[sectionKey] = items;
     }
   });
 
-  // Result contiene 2 nodos fijos (title y summary) y un nodo mas por cada seccion capturada
+  // Capturar experiencia requerida solo en frases que contengan "experience" o "experiencia"
+  const experienceMatches = [];
+  const regex = /\b(\d+(?:\s*-\s*\d+)?)\s*(?:years?|años?)\b/gi;
+  const experienceKeyword = /\b(experience|experiencia)\b/i;
+
+  // Recorrer todas las secciones capturadas (incluye summary si quisieras)
+  Object.values(result).forEach((value) => {
+    if (Array.isArray(value)) {
+      value.forEach((text) => {
+        if (experienceKeyword.test(text)) {
+          let match;
+          while ((match = regex.exec(text))) {
+            experienceMatches.push(match[1].replace(/\s+/g, ""));
+          }
+        }
+      });
+    }
+  });
+
+  if (experienceMatches.length) {
+    const uniqueYears = [...new Set(experienceMatches)];
+    result.summary["años experiencia"] = uniqueYears;
+  }
+
   return result;
 }
 
@@ -224,7 +277,7 @@ function validateConfig(config) {
     "filterData",
     "transformData",
     "cleanData",
-    "extractJobDetails",
+    "extractJobDetailsBBVA",
   ];
   const errors = [];
   if (!config.url || typeof config.url !== "string") {
@@ -291,7 +344,7 @@ function validateConfig(config) {
         errors.push(`Paso ${idx}: params debe ser un objeto`);
       }
     }
-    if (step.step === "exploreHtml" || step.step === "extractJobDetails") {
+    if (step.step === "exploreHtml" || step.step === "extractJobDetailsBBVA") {
       if (step.params !== undefined && step.params !== null) {
         errors.push(`Paso ${idx}: ${step.step} no debe tener params`);
       }
@@ -329,8 +382,8 @@ export async function runPipeline(config) {
       case "cleanData":
         intermediateData = cleanData(intermediateData, step.params);
         break;
-      case "extractJobDetails":
-        intermediateData = extractJobDetails(currentHtml);
+      case "extractJobDetailsBBVA":
+        intermediateData = extractJobDetailsBBVA(currentHtml);
         break;
       default:
         throw new Error(`Unknown step: ${step.step}`);

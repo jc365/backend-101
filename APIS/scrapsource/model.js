@@ -18,6 +18,7 @@ import mongoose from "mongoose";
 const resourceSchema = new mongoose.Schema(
   {
     alias: { type: String, required: true, index: true },
+    comment: { type: String },
     url: { type: String, required: true },
     mode: { type: String, enum: ["prod", "test"], default: "test" },
     active: { type: Boolean, default: true },

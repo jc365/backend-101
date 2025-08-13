@@ -5,6 +5,7 @@ import ScrapItem from "../scrapitem/model.js";
 import ScrapRun from "../scraprun/model.js";
 import { runPipeline } from "../../utils/scrapers/processScrap.js";
 import crypto from "crypto";
+import mongoose from "mongoose";
 
 const baseController = crudApiFactory(ScrapSource, camposPermitidosBuscar);
 
@@ -92,10 +93,15 @@ export async function runPipelineTwoPhase(sourceConfig) {
 
 export async function runTwoPhases(req, res) {
   try {
+    mongoose.set('strictQuery', false);
     const sourceConfig = await ScrapSource.findOne({
       alias: req.params.alias,
       active: true,
-    }).lean();
+    });
+    // const sourceConfig = await ScrapSource.findOne({
+    //   alias: req.params.alias,
+    //   active: true,
+    // }).lean();
     if (!sourceConfig)
       return res.status(404).json({ error: "Source no encontrado" });
     const result = await runPipelineTwoPhase(sourceConfig);
