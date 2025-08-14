@@ -33,6 +33,6 @@ const resourceSchema = new mongoose.Schema(
 // AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
 // AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
 // Ejemplo: ['name', 'title']
-export const camposPermitidosBuscar = [];
+export const camposPermitidosBuscar = ['alias'];
 
 export default mongoose.model("ScrapSource", resourceSchema);

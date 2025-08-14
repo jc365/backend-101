@@ -93,15 +93,11 @@ export async function runPipelineTwoPhase(sourceConfig) {
 
 export async function runTwoPhases(req, res) {
   try {
-    mongoose.set('strictQuery', false);
+    // mongoose.set("strictQuery", false);
     const sourceConfig = await ScrapSource.findOne({
       alias: req.params.alias,
       active: true,
-    });
-    // const sourceConfig = await ScrapSource.findOne({
-    //   alias: req.params.alias,
-    //   active: true,
-    // }).lean();
+    }).lean();
     if (!sourceConfig)
       return res.status(404).json({ error: "Source no encontrado" });
     const result = await runPipelineTwoPhase(sourceConfig);
