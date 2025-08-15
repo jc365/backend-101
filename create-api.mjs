@@ -4,52 +4,28 @@
  */
 import fs from "fs";
 import path from "path";
-// import minimist from "minimist";
 import { fileURLToPath } from "url";
 
+// El primer argumento posicional después de "node script.js"
+const resourceName = process.argv[2];
+
+let resourceDirName, resourceModelName;
+// Valida que el resourceName existe y que cumple nomenclatura
+try {
+  ({ resourceDirName, resourceModelName } = checkResourceName(resourceName));
+} catch (err) {
+  console.error(err.message);
+  process.exit(1);
+}
+
+// Get DIR_ROOT in ES Modules (because this file is in dir root)
+const DIR_ROOT = path.dirname(fileURLToPath(import.meta.url));
 const DIR_FATHER_RESOURCES = "APIS";
 const DIR_TEMPLATE = "_template-v1";
 const DIR_NUCLEO = "_nucleo";
 const FILE_RESTART = "toolPaths.mjs";
+const versions = ["v1"]; //-- version fija
 
-// Función para normalizar nombre recurso 
-function normalizeResourceName(name) {
-  const lower = name.toLowerCase();
-  const capitalized = lower.charAt(0).toUpperCase() + lower.slice(1);
-  return { resourceDirName: lower, resourceModelName: capitalized };
-}
-
-// Función de validación para el nombre del recurso
-function validarNombreRecurso(nombre) {
-  // Debe empezar por letra, seguido de letras/números/guion bajo o medio
-  const patron = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
-  return patron.test(nombre);
-}
-
-// Parsear argumentos posicionales (sin usar minimist para flags)
-const resourceName = process.argv[2]; // El primer argumento posicional después de "node script.js"
-
-if (!resourceName) {
-  console.error(
-    "❌ Debes indicar el nombre del recurso como primer argumento posicional"
-  );
-  process.exit(1);
-}
-
-if (!validarNombreRecurso(resourceName)) {
-  console.error(`❌ Nombre de recurso inválido: "${resourceName}". 
-  Debe empezar por una letra y solo puede contener letras, números, guion bajo o guion medio.`);
-  process.exit(1);
-}
-
-// Versión fija
-const versions = ["v1"];
-
-// Get DIR_ROOT in ES Modules (because this file is in dir root)
-const DIR_ROOT = path.dirname(fileURLToPath(import.meta.url));
-
-const { resourceDirName, resourceModelName } =
-  normalizeResourceName(resourceName);
 console.log(`Creating infrastructure for resource ...`);
 
 const basePath = path.join(DIR_ROOT, DIR_FATHER_RESOURCES, resourceDirName);
@@ -98,7 +74,7 @@ console.log(
     ", "
   )}]`
 );
-// console.log("✅ Módulo creado con éxito.");
+
 console.log(
   `[*] Recuerda editar el archivo ...\\${path.join(
     DIR_FATHER_RESOURCES,
@@ -116,3 +92,42 @@ console.log(
   "[*]    de rutas deseado, anteponiendo un guion_bajo a su nombre (_routes-vX.js)"
 );
 console.log("");
+
+//---------------------------------------
+//--------- R U T I N A S - INI ---------
+//---------------------------------------
+function checkResourceName(input) {
+  if (!input) {
+    throw new Error(
+      "❌ Debes indicar el nombre del recurso como primer argumento posicional"
+    );
+  }
+  // Validar que solo contenga minúsculas y numeros (que sean al principio) y guiones medios
+  const formatoValido = /^[a-z][a-z0-9]*(-[a-z][a-z0-9]*)*$/;
+  if (!formatoValido.test(input)) {
+    throw new Error(
+      `Formato inválido: "${input}". Solo minúsculas (admite numeros, pero no al inicio) y guiones medios(-).`
+    );
+  }
+
+  // Dividir en partes
+  const partes = input.split("-");
+
+  // Chequear que la última parte no sea plural simple
+  const ultima = partes[partes.length - 1];
+  if (ultima.endsWith("es") || ultima.endsWith("s")) {
+    throw new Error(
+      `No se permite que la última parte sea plural: "${ultima}".`
+    );
+  }
+
+  // Modelo en PascalCase
+  const modelo = partes
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join("");
+
+  return { resourceDirName: input, resourceModelName: modelo };
+}
+//---------------------------------------
+//--------- R U T I N A S - FIN ---------
+//---------------------------------------

@@ -37,7 +37,7 @@ export default async function registerAutomaticRoutes(
           const html = documentationAdapted(singular, version);
           res.type("html").send(html);
         });
-        console.log(`📄 Documen route mount: ${docRoute}`);
+        // console.log(`📄 Documen route mount: ${docRoute}`);
 
         // Rutas del fichero de rutas
         app.use(fullRoute, router);
