@@ -1,3 +1,4 @@
+// Model of ScrapRun
 // Ejemplo:
 // {
 //   "_id": "ObjectId",
@@ -9,7 +10,6 @@
 //   "log": ["Ejecución correcta", "5 nuevos ítems"]
 // }
 
-// Model of scrapRuns
 import mongoose from "mongoose";
 
 const scrapRunSchema = new mongoose.Schema(

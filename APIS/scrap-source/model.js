@@ -1,3 +1,4 @@
+// Model of ScrapSource
 // Ejemplo
 // {
 //   "_id": "ObjectId",
@@ -12,7 +13,6 @@
 //   "updatedAt": "2025-08-12T17:00:00Z"
 // }
 
-// Model of scrapSources
 import mongoose from "mongoose";
 
 const resourceSchema = new mongoose.Schema(
@@ -29,10 +29,6 @@ const resourceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
-// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
-// AJUSTAR: array con los campos por los que se puede buscar (aparte de ID)
-// Ejemplo: ['name', 'title']
 export const camposPermitidosBuscar = ['alias'];
 
 export default mongoose.model("ScrapSource", resourceSchema);

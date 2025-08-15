@@ -1,8 +1,8 @@
 import ScrapSource, { camposPermitidosBuscar } from "./model.js";
 import crudApiFactory from "../_nucleo/crudApiFactory.js";
 import * as commonUtils from "../_nucleo/common-utils.js";
-import ScrapItem from "../scrapitem/model.js";
-import ScrapRun from "../scraprun/model.js";
+import ScrapItem from "../scrap-item/model.js";
+import ScrapRun from "../scrap-run/model.js";
 import { runPipeline } from "../../utils/scrapers/processScrap.js";
 import crypto from "crypto";
 import mongoose from "mongoose";

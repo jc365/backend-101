@@ -1,3 +1,4 @@
+// Model of ScrapItem
 // Ejemplo:
 // {
 //   "_id": "ObjectId",
@@ -9,7 +10,6 @@
 //   "createdAt": "2025-08-12T17:05:00Z"
 // }
 
-// Model of scrapItems
 import mongoose from "mongoose";
 
 const scrapItemSchema = new mongoose.Schema(
