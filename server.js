@@ -42,10 +42,20 @@ app.get("/", (req, res) => res.send("Server ready (id:sntmr101chrzdhi83jld)"));
 //-- Mount static routes (depending on import's)
 // app.use("/scrap", scrapRoutes); //--usada desde el front de app-jobs
 app.use("/rebound", reboundRoutes);
-app.use("/static", staticPagesRoutes);
+// app.use("/static", staticPagesRoutes);  //-- rutas estaticas bajo /static (ahora se sirven directamente -ver abajo-)
 
 //-- Mount dynamic routes (depending on directories structure)
 await registerAutomaticRoutes(app, pathJoin(ROOT_DIR, "APIS"));
+
+
+// Para mantener la ruta antigua /static/... funcionando (OPCIONAL)
+app.use("/static", express.static(path.join(__dirname, "static-pages")));
+// ********************************************
+// NUEVA POSICIÓN Y RUTA para las páginas estáticas
+// Colócala DESPUÉS de todas las rutas de API.
+// ********************************************
+app.use("/", staticPagesRoutes); // Cambiado de "/static" a "/"
+
 
 // Middleware for routes not found
 app.use((req, res) => res.status(404).send(`Cannot GET ${req.originalUrl}`));
