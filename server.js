@@ -49,7 +49,7 @@ await registerAutomaticRoutes(app, pathJoin(ROOT_DIR, "APIS"));
 
 
 // Para mantener la ruta antigua /static/... funcionando (OPCIONAL)
-app.use("/static", express.static(path.join(__dirname, "static-pages")));
+app.use("/static", express.static(pathJoin(ROOT_DIR, "static-pages")));
 // ********************************************
 // NUEVA POSICIÓN Y RUTA para las páginas estáticas
 // Colócala DESPUÉS de todas las rutas de API.
