@@ -2,18 +2,49 @@ import mongoose from "mongoose";
 
 // Funcion para crear la sintaxis de busqueda combinada de varios textos en varios
 // campos que necesita una query Mongo
-export function buildFilter(terms, fields) {
+// export function buildFilter(terms, fields) {
+//   if (!terms || terms.length === 0) return {};
+//   if (!fields || fields.length === 0) return {};
+
+//   return {
+//     $and: terms.map((term) => ({
+//       $or: fields.map((field) => ({
+//         [field]: { $regex: term, $options: "i" },
+//       })),
+//     })),
+//   };
+// }
+
+export function buildFilter(terms, fields, req = null) {
+  // ← AÑADE req param
   if (!terms || terms.length === 0) return {};
   if (!fields || fields.length === 0) return {};
 
+  const $and = terms.map((term) => ({
+    $or: fields.map((field) => ({ [field]: { $regex: term, $options: "i" } })),
+  }));
+
+  // NUEVO: Multi-tenant GLOBAL (no rompe sin tenantId)
+  const baseFilter = {};
+  if (req?.tenantId) {
+    baseFilter.tenantId = req.tenantId;
+  }
+
   return {
-    $and: terms.map((term) => ({
-      $or: fields.map((field) => ({
-        [field]: { $regex: term, $options: "i" },
-      })),
-    })),
+    ...baseFilter, // tenantId primero (AND estricto)
+    $and,
   };
 }
+
+
+export function getBaseFilter(req) {
+  const filter = {};
+  if (req?.tenantId) {
+    filter.tenantId = req.tenantId;
+  }
+  return filter;
+}
+
 
 // Helper para respuestas estándar
 export function sendSuccess(

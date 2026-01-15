@@ -5,14 +5,15 @@
 // aunque esta especializado para el elemento al que da funcionalidad.
 
 import paginate from "./paginate.js";
-import { sendSuccess, sendError, sanitizeValor } from "./common-utils.js";
+import * as commonUtils from "./common-utils.js";
 
 const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
   const listarItems = async (req, res) => {
     try {
       const baseUrl = req.baseUrl + req.path;
-      const resultado = await paginate(Item, req, baseUrl, {});
-      return sendSuccess(
+      const filter = commonUtils.getBaseFilter(req); // ← NUEVO
+      const resultado = await paginate(Item, req, baseUrl, filter);
+      return commonUtils.sendSuccess(
         res,
         resultado.data,
         "Listado obtenido correctamente",
@@ -21,16 +22,21 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
         resultado.links
       );
     } catch (err) {
-      return sendError(res, err.message, 400);
+      return commonUtils.sendError(res, err.message, 400);
     }
   };
 
   const crearItem = async (req, res) => {
     try {
       const nuevoItem = await Item.create(req.body);
-      return sendSuccess(res, nuevoItem, "Item creado correctamente", 201);
+      return commonUtils.sendSuccess(
+        res,
+        nuevoItem,
+        "Item creado correctamente",
+        201
+      );
     } catch (err) {
-      return sendError(res, "Error al crear item", err, 400);
+      return commonUtils.sendError(res, "Error al crear item", err, 400);
     }
   };
 
@@ -38,11 +44,15 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
     try {
       const item = await Item.findById(req.params.id);
       if (!item) {
-        return sendError(res, "No se encontró el Item solicitado", 404);
+        return commonUtils.sendError(
+          res,
+          "No se encontró el Item solicitado",
+          404
+        );
       }
-      return sendSuccess(res, item);
+      return commonUtils.sendSuccess(res, item);
     } catch (err) {
-      return sendError(res, "Error al buscar item", err);
+      return commonUtils.sendError(res, "Error al buscar item", err);
     }
   };
 
@@ -52,11 +62,19 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
         new: true,
       });
       if (!item) {
-        return sendError(res, "No se encontró el Item a actualizar", 404);
+        return commonUtils.sendError(
+          res,
+          "No se encontró el Item a actualizar",
+          404
+        );
       }
-      return sendSuccess(res, item, "Item actualizado correctamente");
+      return commonUtils.sendSuccess(
+        res,
+        item,
+        "Item actualizado correctamente"
+      );
     } catch (err) {
-      return sendError(res, "Error al actualizar item", err, 400);
+      return commonUtils.sendError(res, "Error al actualizar item", err, 400);
     }
   };
 
@@ -67,11 +85,20 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
         new: true,
       });
       if (!item) {
-        return sendError(res, "No se encontró el Item a actualizar", null, 404);
+        return commonUtils.sendError(
+          res,
+          "No se encontró el Item a actualizar",
+          null,
+          404
+        );
       }
-      return sendSuccess(res, item, "Item actualizado correctamente");
+      return commonUtils.sendSuccess(
+        res,
+        item,
+        "Item actualizado correctamente"
+      );
     } catch (err) {
-      return sendError(res, "Error al actualizar item", err, 400);
+      return commonUtils.sendError(res, "Error al actualizar item", err, 400);
     }
   };
 
@@ -79,13 +106,18 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
     try {
       const item = await Item.findByIdAndDelete(req.params.id);
       if (!item) {
-        return sendError(res, "No se encontró el Item a borrar", null, 404);
+        return commonUtils.sendError(
+          res,
+          "No se encontró el Item a borrar",
+          null,
+          404
+        );
       }
       // According to the purist view of REST, status should be 204 without JSON.
       // For ease of processing, we send a 200 with standar JSON.
-      return sendSuccess(res, null, "Item borrado correctamente");
+      return commonUtils.sendSuccess(res, null, "Item borrado correctamente");
     } catch (err) {
-      return sendError(res, "Error al borrar item", err);
+      return commonUtils.sendError(res, "Error al borrar item", err);
     }
   };
 
@@ -101,9 +133,9 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
       );
     }
 
-    const valorSanitizado = sanitizeValor(valor);
+    const valorSanitizado = commonUtils.sanitizeValor(valor);
     if (valorSanitizado === null) {
-      return sendError(
+      return commonUtils.sendError(
         res,
         "Valor para búsqueda contiene caracteres no permitidos",
         null,
@@ -115,11 +147,20 @@ const crudApiFactory = (Item, camposPermitidosBuscar = []) => {
       const filtro = { [campo]: valorSanitizado };
       const item = await Item.findOne(filtro);
       if (!item) {
-        return sendError(res, "No se encontró el Item solicitado", null, 404);
+        return commonUtils.sendError(
+          res,
+          "No se encontró el Item solicitado",
+          null,
+          404
+        );
       }
-      return sendSuccess(res, item);
+      return commonUtils.sendSuccess(res, item);
     } catch (err) {
-      return sendError(res, `Error al buscar item por ${campo}`, err);
+      return commonUtils.sendError(
+        res,
+        `Error al buscar item por ${campo}`,
+        err
+      );
     }
   };
 
