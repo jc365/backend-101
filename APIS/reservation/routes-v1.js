@@ -1,25 +1,25 @@
-import ItemController from "./controller.js";
-import { validateObjectIdMW } from "../_nucleo/common-utils.js";
+import controller from "./controller.js"; // ← Import default (tu export)
 import express from "express";
-import { tenantMiddleware } from '../_nucleo/tenant-middleware.js';
+import { tenantMiddleware } from "../_nucleo/tenant-middleware.js";
+import { validateObjectIdMW } from "../_nucleo/common-utils.js"; // Template
 
 const router = express.Router();
-router.use(tenantMiddleware);  
 
-//====================== R U T A S ==================================
-// Orden-1: rutas con nombre fijo (sin MW)
+// Middleware global
+router.use(tenantMiddleware);
 
-// Orden-2: rutas con dos parámetros dinámicos (sin MW)
-router.get("/:campo/:valor", ItemController.buscarPorCampo);
+// CUSTOM RESERVAS
+router.get("/availability", controller.getAvailability);
 
-// Orden-3: rutas con :id (con MW que valida formato del ID)
-router.get("/:id", validateObjectIdMW, ItemController.obtenerItem);
-router.put("/:id", validateObjectIdMW, ItemController.actualizarItem);
-router.patch("/:id", validateObjectIdMW, ItemController.actualizarParcialItem);
-router.delete("/:id", validateObjectIdMW, ItemController.borrarItem);
+// Template rutas (ItemController → controller)
+router.get("/campo/:valor", controller.buscarPorCampo); // Custom si tienes
+router.get("/:id", validateObjectIdMW, controller.obtenerItem);
+router.put("/:id", validateObjectIdMW, controller.actualizarItem);
+router.patch("/:id", validateObjectIdMW, controller.actualizarParcialItem);
+router.delete("/:id", validateObjectIdMW, controller.borrarItem);
 
-// Orden-4: rutas sin parametros (sin MW)
-router.get("/", ItemController.listarItems);
-router.post("/", ItemController.crearItem);
+// CRUD raíz
+router.get("/", controller.listarItems);
+router.post("/", controller.crearItem);
 
 export default router;

@@ -2,18 +2,26 @@ import jwt from "jsonwebtoken";
 import Tenant from "../tenant/model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret123";
-const isDev = process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'development';
+const isDev =
+  process.env.NODE_ENV === "local" || process.env.NODE_ENV === "development";
 
 export const tenantMiddleware = async (req, res, next) => {
   try {
-    if (isDev) console.log("  🔍 ", req.method, req.baseUrl || req.path);
+    // if (isDev) console.log("  🔍 ", req.method, req.baseUrl || req.path);
+    if (isDev)
+      console.log("🔍 DEBUG:", {
+        path: req.path,
+        baseUrl: req.baseUrl,
+        query: req.query, // ← ¿admin=true llega?
+        host: req.get("host"),
+      });
 
     // Bypass creación tenants mientras pruebas
-    if (isDev && req.method === 'POST' && req.baseUrl?.includes('tenants')) {
-      if (isDev) console.log('  ✅ Bypass tenants POST');
+    if (isDev && req.method === "POST" && req.baseUrl?.includes("tenants")) {
+      if (isDev) console.log("  ✅ Bypass tenants POST");
       return next();
     }
-    
+
     // JWT (frontend login)
     const auth = req.headers.authorization;
     if (auth?.startsWith("Bearer ")) {

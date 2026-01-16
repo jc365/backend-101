@@ -1,35 +1,81 @@
-import Item, { camposPermitidosBuscar } from "./model.js";
+import Reservation, { camposPermitidosBuscar } from "./model.js";
 import crudApiFactory from "../_nucleo/crudApiFactory.js";
 import * as commonUtils from "../_nucleo/common-utils.js";
+import Employee from "../employee/model.js";
+import {
+  parseISO,
+  addMinutes,
+  isWithinInterval,
+  startOfDay,
+  endOfDay,
+  format,
+} from "date-fns";
+import pkg from "rrule";
 
-const baseController = crudApiFactory(Item, camposPermitidosBuscar);
+const { RRule } = pkg.default || pkg;
+const baseController = crudApiFactory(Reservation, camposPermitidosBuscar);
 
-// Example of our own method outside the factory: search powerfull about especific fields's resource
-// It is necessary to add it to the export default along with baseController
-// Also needs...... import paginate from "../_nucleo/paginate.js";
-//
-// async function specialMethod(req, res) {
-//   try {
-//     const q = req.query.q || ""; //-- q = 'hello world'
-//     const terms = q.trim().split(/\s+/).filter(Boolean); //-- split for every word
-//     const fields = ["title", "name"]; //-- search fields
-//     let filter = commonUtils.buildFilter(terms, fields); //-- make filter for mongo
-//     //-- filter has a query Mongo for search 'hello' or 'world' in 'title' or 'name'
-//     const baseUrl = req.baseUrl + req.path;
-//     const resultado = await paginate(Item, req, baseUrl, filter);
-//     return commonUtils.sendSuccess(
-//       res,
-//       resultado.data,
-//       "Listado obtenido correctamente",
-//       200,
-//       resultado.pagination,
-//       resultado.links
-//     );
-//   } catch (err) {
-//     return commonUtils.sendError(res, err.message, 400);
-//   }
-// }
+const getAvailability = async (req, res) => {
+  try {
+    const { date, duration = 30, emp = "all" } = req.query;
+    const targetDate = parseISO(`${date}T00:00:00`);
+    const dayStart = startOfDay(targetDate);
+    const dayEnd = endOfDay(targetDate);
+
+    // Employees del tenant
+    const employees =
+      emp === "all"
+        ? await Employee.find({ tenantId: req.tenantId })
+        : await Employee.find({ tenantId: req.tenantId, _id: emp });
+
+    const results = [];
+
+    for (const employee of employees) {
+      // 1. Slots schedule (rrule → horarios día)
+      const rule = new RRule({
+        rrule: employee.scheduleRRule,
+        dtstart: targetDate,
+      });
+      const scheduleSlots = rule
+        .all((rr) => rr >= dayStart && rr <= dayEnd)
+        .map((start) => ({
+          start,
+          end: addMinutes(start, parseInt(duration)),
+        }));
+
+      // 2. Reservas ocupadas
+      const bookings = await Reservation.find({
+        tenantId: req.tenantId,
+        employeeId: employee._id,
+        start: { $lt: dayEnd },
+        end: { $gt: dayStart },
+      });
+
+      // 3. Slots libres (no overlap)
+      const freeSlots = scheduleSlots.filter(
+        (slot) =>
+          !bookings.some((b) =>
+            isWithinInterval(slot.start, {
+              start: b.start,
+              end: b.end,
+            })
+          )
+      );
+
+      results.push({
+        employeeId: employee._id,
+        name: employee.name,
+        slots: freeSlots.map((s) => format(s.start, "HH:mm")),
+      });
+    }
+
+    commonUtils.sendSuccess(res, results, "Availability OK");
+  } catch (err) {
+    commonUtils.sendError(res, err.message);
+  }
+};
 
 export default {
   ...baseController,
+  getAvailability, // ← Exporta custom
 };
