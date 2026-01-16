@@ -10,6 +10,7 @@ router.use(tenantMiddleware);
 
 // CUSTOM RESERVAS
 router.get("/availability", controller.getAvailability);
+router.post('/book', tenantMiddleware, controller.bookAppointment);
 
 // Template rutas (ItemController → controller)
 router.get("/campo/:valor", controller.buscarPorCampo); // Custom si tienes

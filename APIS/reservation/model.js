@@ -17,6 +17,7 @@ const schema = new mongoose.Schema(
     clientEmail: String,
     clientPhone: String,
     service: String,
+    duration: { type: Number, default: 30 },
     start: { type: Date, required: true, index: true },
     end: { type: Date, required: true, index: true },
     status: {

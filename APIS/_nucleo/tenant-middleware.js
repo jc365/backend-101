@@ -16,20 +16,48 @@ export const tenantMiddleware = async (req, res, next) => {
         host: req.get("host"),
       });
 
+    if (req.path === "/login") {
+      if (isDev) console.log("  ✅ Bypass para /login");
+      return next(); // Público
+    }
+
     // Bypass creación tenants mientras pruebas
     if (isDev && req.method === "POST" && req.baseUrl?.includes("tenants")) {
       if (isDev) console.log("  ✅ Bypass tenants POST");
       return next();
     }
 
+    if (isDev)
+      console.log(
+        ">🔍 tenantId FINAL:",
+        req.tenantId ? req.tenantId.toString() : "NULL"
+      );
+
     // JWT (frontend login)
     const auth = req.headers.authorization;
+    if (isDev)
+      console.log(
+        "🔐 JWT auth header:",
+        auth,
+        " - Headers recibidos:",
+        req.headers
+      );
+
     if (auth?.startsWith("Bearer ")) {
+      console.log("✅ Bearer detectado"); // ← AÑADE
       const token = auth.slice(7);
       const decoded = jwt.verify(token, JWT_SECRET);
+      console.log("✅ JWT decoded:", decoded.tenantId); // ← AÑADE
       req.tenantId = decoded.tenantId;
       return next();
     }
+
+    // if (auth?.startsWith("Bearer ")) {
+    //   const token = auth.slice(7);
+    //   const decoded = jwt.verify(token, JWT_SECRET);
+    //   req.tenantId = decoded.tenantId;
+    //   return next();
+    // }
 
     // Subdomain (ej: pelu.mcarthur.com)
     const host = req.get("host");
@@ -44,7 +72,7 @@ export const tenantMiddleware = async (req, res, next) => {
 
     // Admin bypass (dev)
     if (req.query.admin === "true") {
-      req.tenantId = null; // Sin filtro
+      req.tenantId = req.query.tenantId || null;
       return next();
     }
 

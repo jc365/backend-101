@@ -1,35 +1,40 @@
-import Item, { camposPermitidosBuscar } from "./model.js";
+import Tenant, { camposPermitidosBuscar } from "./model.js";
 import crudApiFactory from "../_nucleo/crudApiFactory.js";
 import * as commonUtils from "../_nucleo/common-utils.js";
+import jwt from "jsonwebtoken";
 
-const baseController = crudApiFactory(Item, camposPermitidosBuscar);
+const JWT_SECRET = process.env.JWT_SECRET || "devsecret123";
+const baseController = crudApiFactory(Tenant, camposPermitidosBuscar);
 
-// Example of our own method outside the factory: search powerfull about especific fields's resource
-// It is necessary to add it to the export default along with baseController
-// Also needs...... import paginate from "../_nucleo/paginate.js";
-//
-// async function specialMethod(req, res) {
-//   try {
-//     const q = req.query.q || ""; //-- q = 'hello world'
-//     const terms = q.trim().split(/\s+/).filter(Boolean); //-- split for every word
-//     const fields = ["title", "name"]; //-- search fields
-//     let filter = commonUtils.buildFilter(terms, fields); //-- make filter for mongo
-//     //-- filter has a query Mongo for search 'hello' or 'world' in 'title' or 'name'
-//     const baseUrl = req.baseUrl + req.path;
-//     const resultado = await paginate(Item, req, baseUrl, filter);
-//     return commonUtils.sendSuccess(
-//       res,
-//       resultado.data,
-//       "Listado obtenido correctamente",
-//       200,
-//       resultado.pagination,
-//       resultado.links
-//     );
-//   } catch (err) {
-//     return commonUtils.sendError(res, err.message, 400);
-//   }
-// }
+// controller.js tenants
+export const tenantLogin = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Admin/superuser login (hardcode o DB)
+    if (email === "admin@mcarthur.com" && password === "123") {
+      const tenant = await Tenant.findById("696956f31e25f13a08a35ec8");
+      const token = jwt.sign({ tenantId: tenant._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+
+      res.json({
+        token,
+        tenant: {
+          id: tenant._id,
+          name: tenant.name,
+          subdomain: tenant.subdomain,
+        },
+      });
+    } else {
+      res.status(401).json({ error: "Credenciales inválidas" });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Login failed" });
+  }
+};
 
 export default {
   ...baseController,
+  tenantLogin,
 };
