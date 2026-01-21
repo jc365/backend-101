@@ -2,19 +2,23 @@ import jwt from "jsonwebtoken";
 import Tenant from "../tenant/model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret123";
-const isDev =
-  process.env.NODE_ENV === "local" || process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === "local";
 
 export const tenantMiddleware = async (req, res, next) => {
   try {
-    // if (isDev) console.log("  🔍 ", req.method, req.baseUrl || req.path);
-    if (isDev)
-      console.log("🔍 DEBUG:", {
-        path: req.path,
-        baseUrl: req.baseUrl,
-        query: req.query, // ← ¿admin=true llega?
-        host: req.get("host"),
-      });
+    if (isDev) {
+      const now = new Date().toISOString();
+      console.log(
+        `\n\n🔍 ======================= ${now} >> ${req.method} ${req.path}`,
+        {
+          path: req.path,
+          baseUrl: req.baseUrl,
+          query: JSON.stringify(req.query, null, 2), // ← ¡JSON!
+          body: req.body ? JSON.stringify(req.body, null, 2) : null, // ← Body!
+          host: req.get("host"),
+        }
+      );
+    }
 
     if (req.path === "/login") {
       if (isDev) console.log("  ✅ Bypass para /login");
@@ -27,37 +31,27 @@ export const tenantMiddleware = async (req, res, next) => {
       return next();
     }
 
-    if (isDev)
-      console.log(
-        ">🔍 tenantId FINAL:",
-        req.tenantId ? req.tenantId.toString() : "NULL"
-      );
+    if (isDev) console.log("🔍 - Headers received:", req.headers);
 
     // JWT (frontend login)
     const auth = req.headers.authorization;
-    if (isDev)
-      console.log(
-        "🔐 JWT auth header:",
-        auth,
-        " - Headers recibidos:",
-        req.headers
-      );
 
     if (auth?.startsWith("Bearer ")) {
       console.log("✅ Bearer detectado"); // ← AÑADE
       const token = auth.slice(7);
       const decoded = jwt.verify(token, JWT_SECRET);
-      console.log("✅ JWT decoded:", decoded.tenantId); // ← AÑADE
+
+      console.log("🔐 JWT decoded. TenantId:", decoded.tenantId);
       req.tenantId = decoded.tenantId;
+
+      // Fill tenantId in Body (secure)
+      if (req.body && req.method === "POST") {
+        req.body.tenantId = req.tenantId;
+        console.log("🔍 tenantId AUTOFILL:", req.body.tenantId);
+      }
+
       return next();
     }
-
-    // if (auth?.startsWith("Bearer ")) {
-    //   const token = auth.slice(7);
-    //   const decoded = jwt.verify(token, JWT_SECRET);
-    //   req.tenantId = decoded.tenantId;
-    //   return next();
-    // }
 
     // Subdomain (ej: pelu.mcarthur.com)
     const host = req.get("host");
