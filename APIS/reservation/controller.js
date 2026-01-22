@@ -15,10 +15,10 @@ import pkg from "rrule";
 
 const { RRule } = pkg.default || pkg;
 const baseController = crudApiFactory(Reservation, camposPermitidosBuscar);
-const isDev = process.env.NODE_ENV === "local";
+const isDisplays = process.env.SW_CONSOLE === "true";
 
 export const getAvailability = async (req, res) => {
-  if (isDev) console.log("🔍 getAvailability - Parms request:", req.query);
+  if (isDisplays) console.log("🔍 getAvailability - Parms request:", req.query);
   try {
     const {
       date,
@@ -38,7 +38,7 @@ export const getAvailability = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "tenantId requerido" });
 
-    if (isDev)
+    if (isDisplays)
       console.log("🔍 getAvailability - Pre-Mongo: ", {
         date,
         duration,
@@ -162,7 +162,7 @@ export const bookAppointment = async (req, res) => {
 
     // CHECK start/slotStart
     const slotStart = new Date(start);
-    if (isDev)
+    if (isDisplays)
       console.log(
         "🔍 bookAppointment - Body request:",
         req.body,

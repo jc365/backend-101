@@ -72,7 +72,7 @@ export function sendError(
   code = 500,
   data = null
 ) {
-  if (process.env?.NODE_ENV === "local") {
+  if (process.env?.SW_CONSOLE === "true") {
     if (error) console.error("ERROR:", error);
     if (message) console.error("MESSAGE:", message);
   }

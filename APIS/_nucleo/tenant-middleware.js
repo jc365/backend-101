@@ -2,36 +2,46 @@ import jwt from "jsonwebtoken";
 import Tenant from "../tenant/model.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret123";
+const isConsole = process.env.SW_CONSOLE === "true";
 const isDev = process.env.NODE_ENV === "local";
 
 export const tenantMiddleware = async (req, res, next) => {
   try {
-    if (isDev) {
+    if (isConsole) {
       const now = new Date().toISOString();
+      const headers = { ...req.headers };
+
+      // 🚫 Ocultar info irrelevante
+      delete headers.cookie;
+      delete headers["sec-ch-ua"];
+      delete headers["sec-ch-ua-mobile"];
+      delete headers["sec-ch-ua-platform"];
+      delete headers["accept-encoding"];
+      delete headers["accept-language"];
+
       console.log(
-        `\n\n🔍 ======================= ${now} >> ${req.method} ${req.path}`,
+        `\n🔍 ============ ${now} >> ${req.method} ${req.path} ===========`,
         {
           path: req.path,
           baseUrl: req.baseUrl,
-          query: JSON.stringify(req.query, null, 2), // ← ¡JSON!
-          body: req.body ? JSON.stringify(req.body, null, 2) : null, // ← Body!
+          query: JSON.stringify(req.query, null, 2),
+          body: req.body ? JSON.stringify(req.body, null, 2) : null,
+          headers, 
           host: req.get("host"),
         }
       );
     }
 
     if (req.path === "/login") {
-      if (isDev) console.log("  ✅ Bypass para /login");
-      return next(); // Público
+      if (isConsole) console.log("  ✅ Bypass para /login");
+      return next(); //-- ruta que no pasa por el este MW
     }
 
     // Bypass creación tenants mientras pruebas
     if (isDev && req.method === "POST" && req.baseUrl?.includes("tenants")) {
-      if (isDev) console.log("  ✅ Bypass tenants POST");
+      if (isConsole) console.log("  ✅ Bypass tenants POST");
       return next();
     }
-
-    if (isDev) console.log("🔍 - Headers received:", req.headers);
 
     // JWT (frontend login)
     const auth = req.headers.authorization;
