@@ -7,7 +7,7 @@
  * @param {*} generalDaysSet 
  * @returns 
  */
-export function validateCustomDays(customDays, generalDaysSet) {
+export function validateScheduleDays(customDays, generalDaysSet) {
   for (const day of customDays) {
     if (!generalDaysSet.has(day)) {
       return `Day '${day}' (custom) not allowed. General days: ${Array.from(

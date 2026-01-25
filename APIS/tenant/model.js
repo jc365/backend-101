@@ -21,12 +21,25 @@ const HolidaySchema = new mongoose.Schema(
   { _id: false }
 );
 
+const BreakSchema = new mongoose.Schema(
+  {
+    day_key: String, // "mon", "tue"
+    day_label: String, // "Monday"
+    start: String, // "12:00"
+    end: String, // "13:00"
+    label: String, // "Lunch break"
+  },
+  { _id: false }
+);
+
 const TenantSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
     address: String,
     phone: String,
     email: String,
+    minutes_slot: { type: Number, default: 15 }, // 15,30
+    accept_appointment_custom: { type: Boolean, default: true },
 
     //     subdomain: { type: String, unique: true, sparse: true }, // mcarthur.tudominio.com
     //     stripePublishableKey: String,
@@ -35,9 +48,7 @@ const TenantSchema = new mongoose.Schema(
 
     general_schedule: [ScheduleSchema],
     general_holidays: [HolidaySchema],
-
-    minutes_slot: { type: Number, default: 15 }, // 15,30
-    accept_appointment_custom: { type: Boolean, default: true },
+    general_breaks: [BreakSchema],
   },
   {
     timestamps: true,
