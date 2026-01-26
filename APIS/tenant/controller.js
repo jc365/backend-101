@@ -2,10 +2,7 @@ import Tenant, { camposPermitidosBuscar } from "./model.js";
 import Employee from "../employee/model.js";
 import crudApiFactory from "../_nucleo/crudApiFactory.js";
 import * as commonUtils from "../_nucleo/common-utils.js";
-import {
-  generateGeneralSchedule,
-  generateGeneralBreaks,
-} from "../../utils/reservas/scheduleUtils.js";
+import * as toolsReservas from "../../utils/reservas/scheduleUtils.js";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "devsecret123";
@@ -156,7 +153,8 @@ export const getMyTenant = async (req, res) => {
 export const updateMyGeneralWeek = async (req, res) => {
   const { general_week, general_breaks = [], general_holidays = [] } = req.body;
   console.log("entro en updateMyGeneralWeek-1");
-  // Validación (tu código actual)
+
+  // Validaciones
   if (!general_week || typeof general_week !== "object") {
     return res.status(400).json({ error: "general_week required" });
   }
@@ -172,40 +170,28 @@ export const updateMyGeneralWeek = async (req, res) => {
   }
 
   try {
-    // req.tenantId cargado por tenantMiddleware (JWT)
-    const general_schedule = generateGeneralSchedule(general_week);
-    const flush = generateGeneralBreaks(general_breaks);
-    console.log(
-      "entro en updateMyGeneralWeek-2 (sch+brks)",
-      general_schedule,
-      flush
-    );
-
     const tenant = await Tenant.findByIdAndUpdate(
-      req.tenantId, // ← JWT autofill
+      req.tenantId, // autofill by MW (token-JWT)
       {
-        general_schedule,
-        general_week,
-        general_breaks: generateGeneralBreaks(general_breaks),
-        general_holidays,
+        general_schedule: toolsReservas.generateGeneralSchedule(general_week),
+        general_breaks: toolsReservas.generateGeneralBreaks(general_breaks),
+        general_holidays: toolsReservas.generateHoliday(general_holidays),
       },
       { new: true }
     );
-    debugger;
-    // Generate schedule (tu código)
-    // const general_schedule = generateGeneralSchedule(general_week);
-    console.log("entro en updateMyGeneralWeek-3 ...", general_schedule);
 
+    const response = {
+      id: tenant.id,
+      name: tenant.name,
+      general_schedule: tenant.general_schedule,
+      general_breaks,
+      general_holidays,
+    };
+
+    console.log("Request-response ... ", response);
     res.json({
       status: "success",
-      data: {
-        id: tenant.id,
-        name: tenant.name,
-        general_week,
-        general_schedule,
-        general_breaks,
-        general_holidays,
-      },
+      data: response,
     });
   } catch (error) {
     console.error("Update my general week error:", error);

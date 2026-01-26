@@ -39,11 +39,11 @@ export function generateGeneralSchedule(general_week) {
 }
 
 export function generateGeneralBreaks(general_breaks_week) {
-  console.log("zzz:", general_breaks_week);
+  // console.log("zzz:", general_breaks_week);
   const breaks = [];
 
   (general_breaks_week || []).forEach((breakItem) => {
-    console.log("breakItem..", breakItem, breakItem.day);
+    // console.log("breakItem..", breakItem, breakItem.day);
     if (
       breakItem &&
       breakItem.start &&
@@ -61,7 +61,7 @@ export function generateGeneralBreaks(general_breaks_week) {
     }
   });
 
-  console.log("breaks[]...", breaks);
+  // console.log("breaks[]...", breaks);
   return breaks;
 }
 
@@ -86,3 +86,27 @@ export function addDays(date, days) {
   d.setDate(d.getDate() + days);
   return d;
 }
+
+export function generateHoliday(holidaysUI) {
+  const holidays = [];
+  (holidaysUI || []).forEach((holiday) => {
+    // console.log("breakItem..", breakItem, breakItem.day);
+    holidays.push({
+      ...holiday,
+      rrule: holiday.recurring
+        ? `FREQ=YEARLY;BYMONTH=${holiday.date.slice(
+            5,
+            7
+          )};BYMONTHDAY=${holiday.date.slice(8)}`
+        : `FREQ=DAILY;UNTIL=${holiday.date}T235959Z`,
+    });
+  });
+  return holidays;
+}
+
+// export function parseHolidaysFromDB(holidays) {
+//   return (holidays || []).map((h) => ({
+//     id: Date.now() + Math.random(),
+//     ...h, // date, label, recurring directo
+//   }));
+// }

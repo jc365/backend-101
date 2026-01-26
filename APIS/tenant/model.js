@@ -14,9 +14,10 @@ const ScheduleSchema = new mongoose.Schema(
 
 const HolidaySchema = new mongoose.Schema(
   {
+    date: String,
     label: String,
-    date: String, // "2026-12-25"
-    rrule: String, // Anuales: "FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25"
+    rrule: String,
+    recurring: Boolean,
   },
   { _id: false }
 );
