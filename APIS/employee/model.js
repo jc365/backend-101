@@ -15,6 +15,7 @@ const EmployeeSchema = new mongoose.Schema(
       enum: ["worker", "manager", "admin"],
       default: "worker",
     },
+    timezone: { type: String, default: null },
 
     sw_general_schedule: { type: Boolean, default: true }, // ✅ Referencia
 

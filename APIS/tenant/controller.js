@@ -35,7 +35,6 @@ export const tenantLogin = async (req, res) => {
   }
 };
 
-// Tu updateGeneralWeek actual (legacy con :id) → mantener por ahora
 export const updateGeneralWeek = async (req, res) => {
   const { id } = req.params;
   const { general_week, general_breaks = [], general_holidays = [] } = req.body;
@@ -151,6 +150,58 @@ export const getMyTenant = async (req, res) => {
 
 // update general_schedule de MI tenant
 export const updateMyGeneralWeek = async (req, res) => {
+  // const { general_week, general_breaks = [], general_holidays = [] } = req.body;
+  console.log("entro en updateMyGeneralWeek-1");
+
+  // // Validaciones
+  // if (!general_week || typeof general_week !== "object") {
+  //   return res.status(400).json({ error: "general_week required" });
+  // }
+
+  // const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+  // for (const day of days) {
+  //   const cfg = general_week[day];
+  //   if (cfg?.enabled && (!cfg.start || !cfg.end || cfg.start >= cfg.end)) {
+  //     return res.status(400).json({
+  //       error: `Invalid schedule for ${day}: start < end required`,
+  //     });
+  //   }
+  // }
+
+  try {
+    // const tenant = await Tenant.findById(req.tenantId);
+
+    const tenant = await Tenant.findByIdAndUpdate(
+      req.tenantId,
+      {
+        general_schedule: req.body.general_schedule,
+        // general_week: req.body.general_schedule,
+      },
+      {
+        new: true,
+      }
+    );
+
+    // funciona ok
+    // const tenant = await Tenant.findByIdAndUpdate(
+    //   req.tenantId, req.body, { new: true }
+    // );
+
+    const response = tenant.toObject();
+    delete response.password; //-- Oculta info irrelevante/protegida
+    console.log("Request-response ... " + JSON.stringify(response, null, 2));
+
+    res.json({
+      status: "success",
+      data: response,
+    });
+  } catch (error) {
+    console.error("Update my general week error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const updateMyGeneralWeek__OLD = async (req, res) => {
   const { general_week, general_breaks = [], general_holidays = [] } = req.body;
   console.log("entro en updateMyGeneralWeek-1");
 

@@ -19,6 +19,11 @@ router.post("/login", ItemController.tenantLogin);
 // 🔥 NUEVAS RUTAS /me (JWT scoped)
 router.get("/me", tenantMiddleware, ItemController.getMyTenant);
 router.put(
+  "/me/general-week-KLAVO ",
+  tenantMiddleware,
+  ItemController.updateMyGeneralWeek
+);
+router.put(
   "/me/general-week",
   tenantMiddleware,
   ItemController.updateMyGeneralWeek
