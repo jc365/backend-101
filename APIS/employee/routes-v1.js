@@ -12,6 +12,7 @@ router.use(tenantMiddleware);
 
 // Orden-2: rutas con dos parámetros dinámicos (sin MW)
 router.get("/:campo/:valor", ItemController.buscarPorCampo);
+router.put("/bulk", tenantMiddleware, ItemController.bulkUpdateEmployees);
 
 // Orden-3: rutas con :id (con MW que valida formato del ID)
 router.put("/:id/schedule", tenantMiddleware, async (req, res) => {
