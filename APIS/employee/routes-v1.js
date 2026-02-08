@@ -2,7 +2,7 @@ import ItemController from "./controller.js";
 import Employee from "./model.js";
 import { validateObjectIdMW } from "../_nucleo/common-utils.js";
 import express from "express";
-import { tenantMiddleware } from "../_nucleo/middleware/security.js";  
+import { tenantMiddleware } from "../_nucleo/middleware/tenantContextMiddleware.js";  
 
 const router = express.Router();
 router.use(tenantMiddleware);

@@ -4,10 +4,8 @@ import express from "express";
 import Tenant from "./model.js";
 import { humanToRRule } from "../_nucleo/rruleFactory.js";
 
-import {
-  tenantMiddleware,
-  tenantAuth,
-} from "../_nucleo/middleware/security.js";
+import { tenantMiddleware } from "../_nucleo/middleware/tenantContextMiddleware.js";
+import { tenantAuth } from "../_nucleo/middleware/authMiddleware.js";
 // import { generateGeneralSchedule } from "../../utils/reservas/scheduleUtils.js";
 
 const router = express.Router();
@@ -18,28 +16,12 @@ router.post("/login", ItemController.tenantLogin);
 
 // 🔥 NUEVAS RUTAS /me (JWT scoped)
 router.get("/me", tenantMiddleware, ItemController.getMyTenant);
-router.put(
-  "/me/general-week-KLAVO ",
-  tenantMiddleware,
-  ItemController.updateMyGeneralWeek
-);
-router.put(
-  "/me/general-week",
-  tenantMiddleware,
-  ItemController.updateMyGeneralWeek
-);
+router.put("/me/general-week-KLAVO ", tenantMiddleware, ItemController.updateMyGeneralWeek);
+router.put("/me/general-week", tenantMiddleware, ItemController.updateMyGeneralWeek);
 
 // Legacy (mantén por ahora)
-router.put(
-  "/:id/general-week",
-  tenantMiddleware,
-  ItemController.updateGeneralWeek
-);
-router.put(
-  "/:id/general-schedule",
-  tenantMiddleware,
-  ItemController.updateGeneralSchedule
-);
+router.put("/:id/general-week", tenantMiddleware, ItemController.updateGeneralWeek);
+router.put("/:id/general-schedule", tenantMiddleware, ItemController.updateGeneralSchedule);
 
 router.get("/:id", tenantMiddleware, async (req, res) => {
   const tenant = await Tenant.findById(req.params.id);

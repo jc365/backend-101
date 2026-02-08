@@ -2,7 +2,7 @@
 import express from "express";
 import Employee from "../models/Employee.js";
 import { getDayOfWeek, isHoliday } from "../_nucleo/rruleFactory.js";
-import { tenantMiddleware } from "../_nucleo/middleware/security.js";  
+import { tenantMiddleware } from "../_nucleo/middleware/tenantContextMiddleware.js";  
 
 const router = express.Router();
 router.use(tenantMiddleware);

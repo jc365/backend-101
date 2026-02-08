@@ -1,6 +1,6 @@
 import controller from "./controller.js"; // ← Import default (tu export)
 import express from "express";
-import { tenantMiddleware } from "../_nucleo/middleware/security.js";  
+import { tenantMiddleware } from "../_nucleo/middleware/tenantContextMiddleware.js";  
 import { validateObjectIdMW } from "../_nucleo/common-utils.js"; // Template
 
 const router = express.Router();
