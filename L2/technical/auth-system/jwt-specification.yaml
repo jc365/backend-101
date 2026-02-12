@@ -1,0 +1,24 @@
+jwt_specification:
+  token_structure:
+    payload:
+      userId: "ObjectId (string)"
+      tenantId: "ObjectId o null (admin=null)"
+      role: "admin|tenant|employee|client"
+      email: "string"
+      fullName: "string"
+      type: "access|refresh"
+      iat: "issued_at_timestamp"
+      exp: "expiration_timestamp"
+    
+  validation_rules:
+    - "Token debe tener firma válida"
+    - "Token no debe estar expirado"
+    - "type debe ser 'access' para endpoints protegidos"
+    - "userId debe existir en colección users"
+    
+  # ACTUALIZADO: Ahora solo User model, no múltiples modelos
+  auth_model: "User (único modelo de autenticación)"
+  
+  expiration:
+    access_token: "24h (JWT_EXPIRES_IN)"
+    refresh_token: "7d (JWT_REFRESH_EXPIRES_IN)"

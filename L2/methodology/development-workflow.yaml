@@ -1,0 +1,100 @@
+development_workflow:
+  
+  human_ai_collaboration:
+    
+    human_responsibilities:
+      - "Define business requirements"
+      - "Create and maintain specs (YAML)"
+      - "Review generated code"
+      - "Write integration tests"
+      - "Make architectural decisions"
+      - "Debug complex issues"
+    
+    ai_responsibilities:
+      - "Generate code from specs"
+      - "Write unit tests"
+      - "Create documentation"
+      - "Suggest improvements"
+      - "Refactor existing code"
+      - "Generate boilerplate"
+    
+    workflow:
+      1. "Human: Create/update spec in docs/features/"
+      2. "Human: Create prompt referencing spec"
+      3. "AI: Generate complete implementation"
+      4. "Human: Review and test code"
+      5. "Human: Update spec if needed (feedback loop)"
+  
+  spec_management:
+    
+    versioning: "Semantic versioning (v1.0.0)"
+    change_management:
+      breaking_changes: "Update major version"
+      new_features: "Update minor version"
+      bug_fixes: "Update patch version"
+    
+    organization:
+      foundation: "Core models and business rules (rarely change)"
+      technical: "Implementation patterns (evolve with tech)"
+      methodology: "Workflow and processes"
+      features: "Specific features to implement"
+  
+  code_generation_process:
+    
+    prompt_template: |
+      CONTEXT: MultiReservas v4 - Multi-tenant reservation system
+      
+      SPECS:
+      [Include relevant spec sections]
+      
+      TASK: Generate [component] that:
+      1. [Requirement 1]
+      2. [Requirement 2]
+      3. [Include tests]
+      
+      CONSTRAINTS:
+      - Follow naming: camelCase, PascalCase
+      - Max 30 lines per function
+      - JSDoc comments
+      - Error handling with AppError
+      - Tests with Jest
+    
+    output_requirements:
+      - "Complete files with imports"
+      - "Tests alongside implementation"
+      - "JSDoc documentation"
+      - "Follow project structure"
+      - "Error handling patterns"
+  
+  testing_strategy:
+    
+    test_levels:
+      unit: "Pure functions, utils (fast, no DB)"
+      integration: "Services with mocks"
+      e2e: "Full flows with test DB"
+    
+    test_location: "src/__tests__/[unit|integration|e2e]/"
+    test_naming: "[module].test.js or [module].spec.js"
+    
+    ai_test_generation:
+      requirements:
+        - "Tests must be executable immediately"
+        - "No external dependencies for unit tests"
+        - "Mock external services for integration"
+        - "Include edge cases and error scenarios"
+  
+  deployment_workflow:
+    
+    environments:
+      development: "Local with hot reload"
+      staging: "Pre-production testing"
+      production: "Live system"
+    
+    deployment_steps:
+      1. "Run all tests"
+      2. "Build frontend (Vite)"
+      3. "Docker build"
+      4. "Deploy to environment"
+      5. "Run health checks"
+    
+    rollback_procedure: "Revert to previous Docker image"

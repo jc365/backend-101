@@ -1,0 +1,45 @@
+security_rules:
+  
+  authentication:
+    - "All API endpoints (except public) require valid JWT"
+    - "JWT must be sent in Authorization: Bearer <token> header"
+    - "Token expiration must be checked on every request"
+    - "Failed auth attempts should be logged"
+  
+  authorization:
+    - "Role-based access control (RBAC)"
+    - "Admin: access to all tenants"
+    - "Tenant: access only to own data"
+    - "Employee: access to own schedule and reservations"
+    - "Client: access to own reservations only"
+    
+    endpoint_examples:
+      - "GET /api/admin/* → role: admin"
+      - "GET /api/tenant/* → role: tenant"
+      - "GET /api/employee/* → role: employee"
+      - "GET /api/client/* → role: client"
+  
+rate_limiting:
+  implemented: true
+  library: "express-rate-limit@8.2.1"
+  
+  rules:
+    - endpoint: "POST /api/v1/auth/login"
+      window: "15 minutos"
+      max_attempts: 5
+      skip_successful: true
+      
+    - endpoint: "POST /api/v1/auth/register"
+      window: "1 hora"
+      max_attempts: 3
+      
+    - endpoint: "Todas las rutas /api/v1/*"
+      window: "15 minutos"
+      max_requests: 100
+      key_by: "IP address"
+        
+  input_validation:
+    - "Validate all user input with Joi or similar"
+    - "Sanitize input to prevent XSS"
+    - "Use parameterized queries for database operations"
+    - "Set content-type headers appropriately"

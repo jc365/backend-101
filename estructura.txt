@@ -1,0 +1,65 @@
+./.vscode/launch.json
+./.vscode/settings.json
+./APIS/_nucleo/common-utils.js
+./APIS/_nucleo/crudApiFactory.js
+./APIS/_nucleo/docu.md
+./APIS/_nucleo/middleware/authMiddleware.js
+./APIS/_nucleo/middleware/security-backup.js
+./APIS/_nucleo/middleware/tenantContextMiddleware.js
+./APIS/_nucleo/middleware/timezone.js
+./APIS/_nucleo/paginate.js
+./APIS/_nucleo/registerAutomaticRoutes.js
+./APIS/_nucleo/rruleFactory.js
+./APIS/_nucleo/SIN_USO_tenant-middleware.js
+./APIS/_template-v1/controller.js
+./APIS/_template-v1/model.js
+./APIS/_template-v1/routes.js
+./APIS/employee/controller.js
+./APIS/employee/model.js
+./APIS/employee/routes-v1.js
+./APIS/note/controller.js
+./APIS/note/model.js
+./APIS/note/routes-v1.js
+./APIS/reservation/controller.js
+./APIS/reservation/model.js
+./APIS/reservation/routes-v1.js
+./APIS/scrap-item/controller.js
+./APIS/scrap-item/model.js
+./APIS/scrap-item/routes-v1.js
+./APIS/scrap-run/controller.js
+./APIS/scrap-run/model.js
+./APIS/scrap-run/routes-v1.js
+./APIS/scrap-source/controller.js
+./APIS/scrap-source/model.js
+./APIS/scrap-source/routes-v1.js
+./APIS/tenant/controller.js
+./APIS/tenant/model.js
+./APIS/tenant/model_zone.js
+./APIS/tenant/routes-v1.js
+./docu-local/# APIs.md
+./docu-local/#Documentacion API (desde factoria).md
+./docu-local/Arrays de objetos con claves unicas c.md
+./docu-local/Comandos - CMD.md
+./docu-local/Destacado de texto en Markdown.md
+./docu-local/docu completa del Scrap -tecnica.md
+./docu-local/ejemplo-controller-con-especial.js
+./docu-local/Implementacion de la idea-base para ej.md
+./docu-local/Nuevas funcionalidades.md
+./docu-local/Patron-base API.md
+./docu-local/playground-3.mongodb.js
+./docu-local/playground-7.mongodb.js
+./docu-local/Variable BACKEND del html segun entorno.md
+./package.json
+./package-lock.json
+./routes/availability.js
+./routes/modeloDispacher.js
+./routes/reboundRoutes.js
+./routes/scrapRoutes.js
+./routes/staticPagesRoutes.js
+./script_insert.js
+./server.js
+./test-import.js
+./utils/reservas/NO_USO_validateScheduleDays.js
+./utils/reservas/scheduleUtils.js
+./utils/reservas/timezoneUtils.js
+./utils/scrapers/processScrap.js

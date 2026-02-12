@@ -1,0 +1,157 @@
+# configuration-system.yaml
+metadata:
+  component: "core-system"
+  version: "1.0"
+  status: "implemented"
+  last_updated: "2026-02-10"
+
+system_overview:
+  name: "Configuration Management System"
+  purpose: "Centralized configuration management with hot reload"
+  problem_solved: |
+    - Scattered configuration across .env files, environment variables, and code
+    - No hot reload capability
+    - Difficulty debugging configuration values
+    - Frontend/backend configuration mismatch
+
+architecture:
+  core_component: "ConfigManager (Singleton)"
+  location: "src/core/config/"
+  
+  dependencies:
+    - "Node.js ES Modules"
+    - "MongoDB (for hot reload storage)"
+    - "Express.js middleware"
+
+  directory_structure: |
+    src/core/config/
+    ├── index.js              # ConfigManager class
+    ├── loaders/
+    │   ├── envLoader.js      # Load from .env files
+    │   └── dbLoader.js       # Load from database
+    ├── schemas/
+    │   └── configSchema.js   # Configuration validation
+    └── middleware/
+        └── configMiddleware.js # HTTP middleware
+
+configuration_sources:
+  priority_order: ["database", "environment", "defaults"]
+  
+  database:
+    purpose: "Hot reload configuration"
+    collection: "app_config"
+    update_mechanism: "Polling (configurable interval)"
+  
+  environment:
+    files_loaded: [".env", ".env.local", ".env.{NODE_ENV}"]
+    loading_order: "Last loaded wins"
+  
+  defaults:
+    purpose: "Fallback values for development"
+    location: "Hardcoded in ConfigManager class"
+
+api_endpoints:
+  public:
+    - path: "/api/config/public"
+      method: "GET"
+      purpose: "Safe configuration for frontend"
+      cache: "60 seconds"
+  
+  admin:
+    - path: "/admin/config"
+      method: "GET"
+      purpose: "Full configuration view (development only)"
+    - path: "/admin/config/update"
+      method: "POST"
+      purpose: "Update configuration (development only)"
+
+http_integration:
+  response_headers:
+    - "X-Environment: {NODE_ENV}"
+    - "X-Config-Version: 1.0"
+    - "X-Config-Source: ENV|DB"
+    - "X-Debug-Mode: true|false (development only)"
+
+  request_injection:
+    location: "req.config"
+    access: "All middleware and controllers"
+    example: "const port = req.config.get('PORT', 3000);"
+
+hot_reload:
+  mechanism: "Database polling + event emission"
+  event_name: "config:updated"
+  usage: "config.on('config:updated', ({key}) => { /* react */ })"
+  
+  auto_reconnect_services:
+    - "MongoDB connection"
+    - "External API clients"
+    - "Cache configurations"
+
+validation:
+  schema_file: "configSchema.js"
+  required_keys: ["NODE_ENV", "PORT", "MONGODB_URI"]
+  
+  environment_checks:
+    production:
+      - "JWT_SECRET must not be default value"
+      - "DEBUG_MODE must be false"
+    development:
+      - "Admin endpoints enabled"
+      - "Debug headers included"
+
+integration_examples:
+  database_connection: |
+    // src/config/database.js
+    import config from '../core/config/index.js';
+    
+    const mongoURI = config.get('MONGODB_URI');
+    const timeout = config.get('DB_CONNECTION_TIMEOUT', 5000);
+  
+  environment_config: |
+    // .env.example
+    NODE_ENV=development
+    PORT=3000
+    MONGODB_URI=mongodb://localhost:27017/app
+    LOG_LEVEL=info
+    DEBUG_MODE=false
+
+migration_rules:
+  for_new_code:
+    - "Use config.get() instead of process.env"
+    - "Always provide default values"
+    - "Handle config.update events if service needs hot reload"
+  
+  for_existing_code:
+    - "Replace process.env with config.get() gradually"
+    - "Add default values where missing"
+    - "Test hot reload functionality"
+
+testing:
+  unit_tests:
+    - "ConfigManager initialization"
+    - "Source priority (DB > ENV > defaults)"
+    - "Hot reload events"
+  
+  integration_tests:
+    - "Database reconnection on config change"
+    - "Frontend config endpoint"
+    - "Admin endpoints (development only)"
+
+troubleshooting:
+  common_issues:
+    - issue: "require is not defined in ES module scope"
+      cause: "Mixing CommonJS and ES Modules"
+      solution: "Ensure src/core/ uses import/export"
+    
+    - issue: "ConfigManager not initialized"
+      cause: "Accessing config before init()"
+      solution: "Call config.init() in server.js first"
+
+references:
+  related_specs:
+    - "project-structure.yaml"
+    - "error-handling-system.yaml"
+  
+  external_links:
+    - "ES Modules: https://nodejs.org/api/esm.html"
+    - "Environment Variables Best Practices"

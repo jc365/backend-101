@@ -1,0 +1,23 @@
+auth_middleware_patterns:
+  
+  simplified_auth:
+    pattern: "authMiddleware(req, res, next)"
+    description: "Middleware simplificado que siempre autentica contra User model"
+    advantages:
+      - "Más simple: sin parámetros, sin factory function"
+      - "Siempre usa User model (arquitectura consolidada)"
+      - "Compatible: authMiddleware (sin paréntesis) en rutas"
+    
+    implementation: "src/middleware/authMiddleware.js"
+    
+    provides_to_request:
+      - "req.user (payload JWT decodificado)"
+      - "req.authUser (documento User sin password)"
+      - "req.token (token string original)"
+      - "req.userId (conveniencia)"
+      - "req.tenantId (si existe en token)"
+  
+  role_based_access:
+    pattern: "requireRole('admin', 'tenant')"
+    description: "Middleware RBAC que verifica roles del usuario"
+    usage: "Se combina después de authMiddleware"

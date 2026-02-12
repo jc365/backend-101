@@ -1,0 +1,57 @@
+timezone_handling:
+  
+  strategy: "Store in UTC, display in local timezone"
+  
+  backend_utilities:
+    - "TimezoneService.convertToUTC(localDateTime, timezone)"
+    - "TimezoneService.convertFromUTC(utcDateTime, timezone)"
+    - "TimezoneService.formatForDisplay(utcDateTime, timezone, format)"
+    - "TimezoneService.isValidTimezone(timezone)"
+    - "TimezoneService.generateTimeSlots(start, end, duration, timezone)"
+  
+  frontend_utilities:
+    - "useTimezone(tenantId) hook"
+    - "useReservationTimezone() hook"
+    - "TimezoneDisplay component"
+    - "TimeSlotPicker component"
+  
+  rules:
+    - "All dates in DB stored as UTC"
+    - "All time strings in DB as UTC (HH:MM format)"
+    - "Tenant timezone stored in tenants collection"
+    - "Reservation includes original timezone"
+    - "UI always displays in tenant's timezone"
+    - "Employee can override timezone (inherits from tenant if null)"
+  
+  libraries:
+    backend: "date-fns@^2.30.0, date-fns-tz@^2.0.1"
+    frontend: "date-fns@^2.30.0, date-fns-tz@^2.0.1"
+    
+    import_examples: |
+      // Backend ESM
+      import { utcToZonedTime, zonedTimeToUtc, format } from 'date-fns-tz';
+      import { parseISO, isValid, addMinutes } from 'date-fns';
+      
+      // Frontend
+      import { useTimezone } from '../hooks/useTimezone';
+  
+  common_operations:
+    
+    create_reservation:
+      1. "Receive local datetime from client"
+      2. "Convert to UTC using tenant timezone"
+      3. "Store UTC in database"
+      4. "Return UTC to client with timezone info"
+    
+    display_reservation:
+      1. "Retrieve UTC from database"
+      2. "Convert to local time using tenant timezone"
+      3. "Format for display"
+    
+    availability_calculation:
+      1. "Calculate slots in UTC"
+      2. "Convert to local time for display"
+      3. "Consider timezone differences for DST"
+  
+  timezone_database: "IANA timezone database (via date-fns-tz)"
+  supported_formats: ["HH:mm", "h:mm a", "yyyy-MM-dd HH:mm", "PPP p"]

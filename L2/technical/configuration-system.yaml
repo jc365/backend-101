@@ -1,0 +1,221 @@
+# CONFIGURATION SYSTEM SPECIFICATION
+# Version: 1.0
+# Date: 2026-02-10
+# Status: IMPLEMENTED
+
+metadata:
+  component: "core-system"
+  priority: "P0"
+  status: "implemented"
+  implemented_in: ["MRsp-backend"]
+  depends_on: []
+  required_by: ["all-modules"]
+
+overview:
+  title: "Sistema de Configuración Centralizada"
+  problem_statement: |
+    Configuración dispersa en múltiples archivos .env, variables de entorno 
+    y código hardcodeado. Sin capacidad de cambio en caliente, dificultad 
+    para debuggear, y frontend/backend sin visión unificada.
+  solution_summary: |
+    Sistema centralizado con ConfigManager como único punto de verdad,
+    soporte para múltiples fuentes (ENV > DB > defaults), cambio en caliente,
+    validación de esquemas, y configuración pública para frontend.
+
+architecture:
+  directory_structure: |
+    📦src/
+     ┣ 📂config/           # Configuración de conexiones externas
+     ┃ ┗ 📜database.js     # Conexión a MongoDB usando ConfigManager
+     ┣ 📂core/             # Sistemas centralizados
+     ┃ ┣ 📂config/         # ConfigManager principal
+     ┃ ┃ ├ 📜index.js      # Clase ConfigManager (Singleton)
+     ┃ ┃ ├ 📂loaders/      # Cargadores
+     ┃ ┃ ├ 📂schemas/      # Validación
+     ┃ ┃ └ 📂middleware/   # Middleware
+     ┃ ┣ 📂errors/         # (Próximo)
+     ┃ ┣ 📂logging/        # (Próximo)
+     ┃ ┗ 📂debug/          # (Próximo)
+
+  module_conventions:
+    es_modules:
+      location: ["src/core/**", "src/config/**"]
+      rules: |
+        - Usar import/export
+        - Incluir extensión .js en imports locales
+        - Usar fileURLToPath para __dirname
+      example: |
+        import config from './core/config/index.js';
+        import { fileURLToPath } from 'url';
+    
+    commonjs:
+      location: ["src/controllers/**", "src/models/**", "src/routes/**"]
+      rules: |
+        - Permisible en código legado
+        - Se migrará gradualmente
+      example: |
+        const authController = require('./controllers/authController');
+
+config_manager:
+  class_name: "ConfigManager"
+  pattern: "Singleton"
+  initialization: |
+    // En server.js o punto de entrada
+    import config from './core/config/index.js';
+    await config.init();
+  
+  sources_priority:
+    order: ["db", "env", "defaults"]
+    description: |
+      1. DB: Cambio en caliente (colección app_config)
+      2. ENV: Variables de entorno y archivos .env
+      3. DEFAULTS: Valores hardcodeados para desarrollo
+  
+  key_methods:
+    get_value: |
+      config.get(key, defaultValue)
+      req.config.get(key, defaultValue)
+    
+    public_config: |
+      config.getPublicConfig() → Solo valores seguros para frontend
+    
+    update: |
+      await config.update(key, value, source='db')
+    
+    events: |
+      config.on('config:updated', ({key, source}) => {})
+      config.on('config:changed_via_watch', ({keys}) => {})
+
+  validation:
+    schema: "src/core/config/schemas/configSchema.js"
+    required_keys: ["NODE_ENV", "PORT", "MONGODB_URI"]
+    environment_specific: |
+      production:
+        - JWT_SECRET no puede ser valor por defecto
+        - DEBUG_MODE debe ser false
+      development:
+        - Debug headers automáticos
+        - Endpoints de administración
+
+http_integration:
+  headers: |
+    Cada respuesta incluye:
+    - X-Environment: development|production
+    - X-Config-Version: 1.0
+    - X-Config-Source: ENV|DB
+    - X-Debug-Mode: true|false (solo development)
+  
+  endpoints:
+    public_config: |
+      GET /api/config/public
+      Retorna configuración segura para frontend
+      Cache-Control: public, max-age=60
+    
+    admin_endpoints: |
+      GET  /admin/config       (solo development)
+      POST /admin/config/update (solo development)
+
+database_integration:
+  pattern: "ConfigManager-first"
+  example: |
+    // src/config/database.js
+    import config from '../core/config/index.js';
+    
+    async function connectDB() {
+      const mongoURI = config.get('MONGODB_URI'); // No process.env
+      const timeout = config.get('DB_CONNECTION_TIMEOUT', 5000);
+      // ...
+    }
+  
+  hot_reload: |
+    // Escuchar cambios en MONGODB_URI
+    config.on('config:updated', ({key}) => {
+      if (key === 'MONGODB_URI') {
+        disconnectDB().then(connectDB);
+      }
+    });
+
+environment_files:
+  structure: |
+    .env                    # Valores base (committed)
+    .env.development        # Sobreescribe para desarrollo
+    .env.production         # Sobreescribe para producción
+    .env.local              # Local overrides (gitignored)
+    .env.development.local  # Local + desarrollo (gitignored)
+  
+  loading_order: |
+    1. .env.[NODE_ENV].local
+    2. .env.local
+    3. .env.[NODE_ENV]
+    4. .env
+    5. process.env
+
+implementation_phases:
+  phase_1:
+    name: "Configuración Centralizada"
+    status: "COMPLETED"
+    components: ["ConfigManager", "envLoader", "dbLoader", "configMiddleware"]
+  
+  phase_2:
+    name: "Sistema de Errores"
+    status: "PENDING"
+    components: ["AppError classes", "Error middleware", "Error logging"]
+  
+  phase_3:
+    name: "Sistema de Logging"
+    status: "PENDING"
+    components: ["Winston logger", "Log levels", "Live log streaming"]
+  
+  phase_4:
+    name: "Sistema de Debug"
+    status: "PENDING"
+    components: ["Debug middleware", "Frontend debug helper"]
+
+migration_rules:
+  for_new_code: |
+    1. Usar import/export con extensión .js
+    2. Obtener configuración de config.get() no process.env
+    3. Incluir valores por defecto apropiados
+    4. Manejar eventos de cambio si es necesario
+  
+  for_legacy_code: |
+    1. Reemplazar process.env por config.get()
+    2. Mantener compatibilidad durante transición
+    3. Añadir valores por defecto si no existen
+
+testing:
+  unit_tests: |
+    - ConfigManager initialization
+    - Source priority (DB > ENV > defaults)
+    - Hot reload functionality
+    - Schema validation
+  
+  integration_tests: |
+    - Database connection using ConfigManager
+    - Config change via API
+    - Frontend config endpoint
+    - Headers in responses
+
+troubleshooting:
+  common_issues:
+    - "require is not defined in ES module scope":
+        cause: "Mezcla de CommonJS y ES Modules"
+        solution: "Asegurar que src/core/ use import/export"
+    
+    - "Cannot find module":
+        cause: "Rutas de importación sin .js"
+        solution: "Usar rutas relativas con extensión .js"
+    
+    - "ConfigManager not initialized":
+        cause: "Acceso antes de config.init()"
+        solution: "Inicializar en server.js primero"
+
+references:
+  related_specs:
+    - "project-structure.yaml"
+    - "error-handling.yaml"
+  
+  external_docs:
+    - "ES Modules: https://nodejs.org/api/esm.html"
+    - "Winston logging: https://github.com/winstonjs/winston"
+    - "Environment variables best practices"

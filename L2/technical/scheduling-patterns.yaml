@@ -1,0 +1,96 @@
+scheduling_patterns:
+  
+  schedule_architecture:
+    source_of_truth: "tenant.general_schedule"
+    
+    employee_overrides:
+      enabled: "sw_general_schedule = false"
+      
+      constraints:
+        - "custom_schedule.days ⊆ tenant.general_schedule.days"
+        - "custom_schedule.start ≥ tenant_schedule.start"
+        - "custom_schedule.end ≤ tenant_schedule.end"
+        - "No overlapping custom schedules"
+      
+      validation_hook: "EmployeeSchema.pre('save')"
+    
+    inheritance_rules:
+      timezone:
+        priority: "employee.timezone > tenant.timezone"
+        default: "Si employee.timezone = null → usa tenant.timezone"
+      
+      holidays:
+        combine: "tenant.general_holidays + employee.custom_holidays"
+        priority: "employee custom overrides tenant general"
+  
+  rrule_integration:
+    library: "rrule@^2.8.1"
+    
+    generation:
+      from_schedule: |
+        // Convert schedule to RRule
+        const rule = new RRule({
+          freq: RRule.WEEKLY,
+          byweekday: days.map(day => RRule[day]), // MO, TU, etc.
+          byhour: parseInt(start.split(':')[0]),
+          byminute: parseInt(start.split(':')[1]),
+          dtstart: new Date(Date.UTC(2024, 0, 1)) // Reference date
+        });
+        return rule.toString();
+      
+      from_holiday: |
+        // Single date or recurring holiday
+        if (recurring) {
+          return new RRule({
+            freq: RRule.YEARLY,
+            bymonth: parseInt(date.split('-')[1]),
+            bymonthday: parseInt(date.split('-')[2])
+          }).toString();
+        } else {
+          // One-time exception
+          return `EXDATE:${date}T000000Z`;
+        }
+    
+    validation:
+      - "RRule string must be valid"
+      - "No infinite recurrence without end date"
+      - "Business rules apply to generated instances"
+  
+  availability_calculation:
+    inputs:
+      - "tenant.general_schedule (RRule)"
+      - "employee.schedule (RRule or custom)"
+      - "existing_reservations (UTC times)"
+      - "slot_duration (15,30,45,60)"
+      - "target_timezone"
+    
+    algorithm:
+      1. "Generate schedule instances for date range"
+      2. "Remove holiday exceptions"
+      3. "Remove break times"
+      4. "Split into slots by duration"
+      5. "Remove booked slots"
+      6. "Convert to target timezone"
+    
+    caching:
+      collection: "availability_cache"
+      ttl: "300 seconds (5 minutes)"
+      key: "tenantId + employeeId + date + timezone"
+    
+    performance:
+      - "Pre-calculate for next 7 days (cron job)"
+      - "Cache heavily requested dates"
+      - "Limit range queries (max 30 days)"
+  
+  conflict_detection:
+    rules:
+      - "No overlapping reservations for same employee"
+      - "Reservation must be within employee schedule"
+      - "Consider timezone differences"
+      - "Account for preparation/cleanup time"
+    
+    validation_flow:
+      1. "Convert reservation time to UTC"
+      2. "Check employee schedule (UTC)"
+      3. "Check existing reservations (UTC)"
+      4. "Return available slots (local time)"

@@ -1,0 +1,59 @@
+code_generation_rules:
+  
+  naming_conventions:
+    variables: "camelCase"
+    functions: "camelCase"
+    classes: "PascalCase"
+    constants: "UPPER_SNAKE_CASE"
+    files: "kebab-case"
+  
+  file_structure:
+    max_lines_per_file: 30
+    max_functions_per_file: 5
+    single_responsibility: true
+    
+    component_structure: |
+      // 1. Imports
+      // 2. Constants
+      // 3. Component definition
+      // 4. Helper functions
+      // 5. Export
+    
+    service_structure: |
+      // 1. Imports
+      // 2. Constants
+      // 3. Service class/object
+      // 4. Methods
+      // 5. Export
+  
+  comments_documentation:
+    functions: "JSDoc with @param, @returns, @throws"
+    complex_logic: "Inline comments explaining why, not what"
+    todos: "// TODO: refactor, // FIXME: bug description"
+    language: "English"
+  
+  error_handling:
+    pattern: "Try-catch with specific error types"
+    logging: "Log errors with context (userId, tenantId)"
+    client_messages: "User-friendly messages, not stack traces"
+    
+    error_classes: |
+      class AppError extends Error {
+        constructor(message, statusCode) {
+          super(message);
+          this.statusCode = statusCode;
+        }
+      }
+  
+  testing:
+    test_file_naming: "*.test.js or *.spec.js"
+    test_structure: "describe → test/it → expect"
+    coverage: "Aim for 80%+ coverage"
+    mock_data: "Use factories/fixtures for test data"
+  
+  ai_prompting_guidelines:
+    - "Always reference specific spec files"
+    - "Include complete file paths in output"
+    - "Generate tests alongside implementation"
+    - "Follow established patterns in project"
+    - "Add JSDoc comments for functions"
